@@ -1,0 +1,55 @@
+<.header>
+  Listing Conversation participants
+  <:actions>
+    <.link patch={~p"/conversation_participants/new"}>
+      <.button>New Conversation participant</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="conversation_participants"
+  rows={@streams.conversation_participants}
+  row_click={
+    fn {_id, conversation_participant} ->
+      JS.navigate(~p"/conversation_participants/#{conversation_participant}")
+    end
+  }
+>
+  <:col :let={{_id, conversation_participant}} label="Participant type">
+    <%= conversation_participant.participant_type %>
+  </:col>
+  <:col :let={{_id, conversation_participant}} label="Owner permission">
+    <%= conversation_participant.owner_permission %>
+  </:col>
+  <:action :let={{_id, conversation_participant}}>
+    <div class="sr-only">
+      <.link navigate={~p"/conversation_participants/#{conversation_participant}"}>Show</.link>
+    </div>
+    <.link patch={~p"/conversation_participants/#{conversation_participant}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, conversation_participant}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: conversation_participant.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="conversation_participant-modal"
+  show
+  on_cancel={JS.patch(~p"/conversation_participants")}
+>
+  <.live_component
+    module={CapstoneWeb.ConversationParticipantLive.FormComponent}
+    id={@conversation_participant.id || :new}
+    title={@page_title}
+    action={@live_action}
+    conversation_participant={@conversation_participant}
+    patch={~p"/conversation_participants"}
+  />
+</.modal>

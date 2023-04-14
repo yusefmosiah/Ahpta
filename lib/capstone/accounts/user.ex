@@ -9,6 +9,13 @@ defmodule Capstone.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
 
+    has_many :bots, Capstone.Bots.Bot, foreign_key: :owner_id
+
+    has_many :conversation_participants, Capstone.Conversations.ConversationParticipant,
+      foreign_key: :participant_id
+
+    has_many :messages, Capstone.Messages.Message, foreign_key: :sender_id
+
     timestamps()
   end
 
