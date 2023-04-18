@@ -1,5 +1,11 @@
 # Capstone
 
+## Objectives
+
+- [ ] enable public and private conversations between multiple humans and multiple bots
+- [ ] facilitate a marketplace to rent access to other users bots
+- [ ] enable "breeding" multiple bots together to create a new bot owned in partnership by the owners of the preexisting bots
+
 To start your Phoenix server:
 
   * Run `mix setup` to install and setup dependencies
