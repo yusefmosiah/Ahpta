@@ -6,7 +6,7 @@
 - [ ] facilitate a marketplace to rent access to other users bots
 - [ ] enable "breeding" multiple bots together to create a new bot owned in partnership by the owners of the preexisting bots
 
-To start your Phoenix server:
+## Run It Yourself
 
   * Run `mix setup` to install and setup dependencies
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
