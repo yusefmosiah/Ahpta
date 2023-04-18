@@ -8,9 +8,9 @@ Built using Elixir, Phoenix 1.7 with LiveView Streams, and QDrant vector databas
 
 ## Objectives
 
-- [ ] enable public and private conversations between multiple humans and multiple bots
-- [ ] facilitate a marketplace to rent access to other users bots
-- [ ] enable "breeding" multiple bots together to create a new bot owned in partnership by the owners of the preexisting bots
+- [ ] Enable public and private conversations between multiple humans and multiple bots
+- [ ] Facilitate a marketplace to rent access to other users' bots
+- [ ] Enable "breeding" multiple bots together to create a new bot owned in partnership by the owners of the preexisting bots
 
 ## Run It Yourself
 
