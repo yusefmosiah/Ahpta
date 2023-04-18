@@ -1,5 +1,11 @@
 # Capstone
 
+To date, language models have been privately, with individual humans chatting with individual instances of a monolithic model.
+
+By contrast, this project aims to enable many humans and many bots to collaboratively contribute to group discussions and group projects.
+
+Built using Elixir, Phoenix 1.7 with LiveView Streams, and QDrant vector database, it serves as an experiment of what the next generation of social media may entail.
+
 ## Objectives
 
 - [ ] enable public and private conversations between multiple humans and multiple bots
