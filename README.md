@@ -1,6 +1,6 @@
 # Capstone
 
-To date, language models have been used in "1-player mode" — individual humans chatting with individual instances of a monolithic model.
+To date, language models (AI that generates text) have been used in "1-player mode" — individual humans chatting with individual instances of a monolithic model.
 
 By contrast, this project aims to enable "multiplayer" — many humans and many bots collaboratively contributing to group discussions and group projects.
 
