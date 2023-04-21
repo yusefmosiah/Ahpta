@@ -51,7 +51,8 @@ defmodule Capstone.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:ex_openai, "~> 1.1.0"}
+      {:ex_openai, "~> 1.1.0"},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 
