@@ -5,10 +5,11 @@ defmodule Capstone.Bots.BotServer do
   use GenServer
   alias ExOpenAI.Chat
 
+  ############################## PUBLIC API ##############################
+
   def start_link(opts) do
     name = opts[:name] || __MODULE__
 
-    # refactor after testing to be system_messages list.
     system_messages =
       opts[:system_message] ||
         [
@@ -41,7 +42,7 @@ defmodule Capstone.Bots.BotServer do
   Gets the `context` of the bot server.
 
   Handler handles a `get_cotext` call to the bot server.
-  Context, unlike history, gets summarized by the bot server to keep within the token limit.
+  Context, unlike history, gets checkpointd by the bot server to keep within the token limit.
   Context, like history, includes the system_message(s).
   """
   def get_context(pid_or_module \\ __MODULE__) do
@@ -52,7 +53,7 @@ defmodule Capstone.Bots.BotServer do
   Gets the `history` of the bot server.
 
   Handler handles a `get_history` call to the bot server.
-  History, unlike context, does not get summarized by the bot server.
+  History, unlike context, does not get checkpointd by the bot server.
   History, like context, includes the system_message(s).
   """
   def get_history(pid_or_module \\ __MODULE__) do
@@ -82,7 +83,7 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_call(:get_history, _from, state) do
-    {:reply, [state.history | [state.system_message]], state}
+    {:reply, [state.history | [state.system_message]] |> List.flatten(), state}
   end
 
   @impl true
@@ -97,10 +98,12 @@ defmodule Capstone.Bots.BotServer do
     end
   end
 
+  ############################## PRIVATE FUNCTIONS ##############################
+
   @doc """
     do_chat does most of the work for the bot server.
     It calls the OpenAI API, and handles the response.
-    With an error response, it calls `summarize` to summarize the context and then calls the API again.
+    With an error response, it calls `checkpoint` to checkpoint the context and then calls the API again.
     Other API errors should be handled as well; context should not be lost because of an API error.
   """
   def do_chat(message, model, state) do
@@ -123,16 +126,16 @@ defmodule Capstone.Bots.BotServer do
         {:reply, {assistant_msg, response.usage}, new_state}
 
       {:error, _error} ->
-        {:ok, response} = summarize(state.context)
-        summary = unpack({:ok, response})
-        new_msgs = [user_message | [summary | [state.system_message]]]
+        {:ok, response} = checkpoint(state.context)
+        Checkpoint = unpack({:ok, response})
+        new_msgs = [user_message | [Checkpoint | [state.system_message]]]
 
         {:ok, response2} = Chat.create_chat_completion(new_msgs |> Enum.reverse(), model)
         assistant_msg2 = unpack({:ok, response2})
 
         new_state = %{
           state
-          | context: [assistant_msg2 | [user_message | [summary]]],
+          | context: [assistant_msg2 | [user_message | [Checkpoint]]],
             history: [assistant_msg2 | [user_message | state.history]],
             total_tokens_used:
               state.total_tokens_used + response.usage.total_tokens +
@@ -144,14 +147,15 @@ defmodule Capstone.Bots.BotServer do
   end
 
   @doc """
-  Summarizes the context of the bot server.
-  Future versions will take a summarization prompt as an argument.
+  Checkpoints the context of the bot server.
+  Future versions may take a checkpointing prompt as an argument.
   """
-  def summarize(context, model \\ "gpt-3.5-turbo") do
+  def checkpoint(context, model \\ "gpt-3.5-turbo") do
     msgs = [
       %{
         role: "user",
-        content: "summarize the previous messages, and begin your messags with \"Summary:\""
+        content:
+          "Make a checkpoint (aka snapshot, summary) that consisely represents the content of the previous messages, possibly including previous a checkpoint, and begin the checkpoint message with \"Checkpoint:\""
       }
       | context
     ]

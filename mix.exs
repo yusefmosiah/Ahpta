@@ -52,7 +52,8 @@ defmodule Capstone.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:ex_openai, "~> 1.1.0"},
-      {:mox, "~> 1.0", only: :test}
+      {:mox, "~> 1.0", only: :test},
+      {:mock, "~> 0.3.6", only: :test, override: true}
     ]
   end
 
