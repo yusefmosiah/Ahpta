@@ -11,9 +11,20 @@ defmodule Capstone.Bots.BotServerTest do
     }
   ]
 
-  setup do
+  @valid_attrs %{topic: "test topic"}
+  setup tags do
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Capstone.Repo)
+
+    unless tags[:async] do
+      Ecto.Adapters.SQL.Sandbox.mode(Capstone.Repo, {:shared, self()})
+    end
+
     {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server(name: :unique_name)
-    conversation_id = 1
+
+    conversation_id = Ecto.UUID.generate()
+    attrs = Map.merge(@valid_attrs, %{conversation_id: conversation_id})
+    {:ok, _conversation} = Capstone.Conversations.create_conversation(attrs)
+
     BotServer.join_conversation(pid, conversation_id)
 
     on_exit(fn ->
@@ -42,7 +53,7 @@ defmodule Capstone.Bots.BotServerTest do
 
   describe "join_conversation/1" do
     test "joins conversation successfully", %{pid: pid} do
-      new_conversation_id = 2
+      new_conversation_id = Ecto.UUID.generate()
       assert :ok == BotServer.join_conversation(pid, new_conversation_id)
     end
   end

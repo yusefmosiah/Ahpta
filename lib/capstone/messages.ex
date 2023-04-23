@@ -21,6 +21,11 @@ defmodule Capstone.Messages do
     Repo.all(Message)
   end
 
+  def list_messages(conversation_id) do
+    from(m in Message, where: m.conversation_id == ^conversation_id)
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single message.
 

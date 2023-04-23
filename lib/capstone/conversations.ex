@@ -7,6 +7,7 @@ defmodule Capstone.Conversations do
   alias Capstone.Repo
 
   alias Capstone.Conversations.Conversation
+  alias Capstone.Messages
 
   @doc """
   Returns the list of conversations.
@@ -36,6 +37,13 @@ defmodule Capstone.Conversations do
 
   """
   def get_conversation!(id), do: Repo.get!(Conversation, id)
+
+  def get_conversation(id) do
+    case Repo.get(Conversation, id) do
+      nil -> {:error, :not_found}
+      conversation -> {:ok, conversation}
+    end
+  end
 
   @doc """
   Creates a conversation.
@@ -219,5 +227,15 @@ defmodule Capstone.Conversations do
       owner_permission: false
     })
     |> Repo.insert()
+  end
+
+  @doc """
+  gets convo and messages
+  """
+  def get_conversation_and_messages(conversation_id) do
+    with {:ok, conversation} <- get_conversation(conversation_id),
+         {:ok, messages} <- Messages.list_messages(conversation_id) do
+      {conversation, messages}
+    end
   end
 end

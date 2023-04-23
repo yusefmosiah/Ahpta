@@ -1,6 +1,7 @@
 defmodule Capstone.Bots.BotServer do
   use GenServer
   alias Phoenix.PubSub
+  alias Capstone.Conversations
 
   ############################## PUBLIC API ##############################
 
@@ -53,15 +54,29 @@ defmodule Capstone.Bots.BotServer do
     {:reply, state, state}
   end
 
+  # @impl true
+  # def handle_call({:join_conversation, conversation_id}, _from, state) do
+  #   conversation = %{
+  #     context: [],
+  #     history: [],
+  #     total_tokens_used: 0
+  #   }
+
+  #   new_state = %{state | conversations: %{conversation_id => conversation}}
+
+  #   {:reply, :ok, new_state}
+  # end
   @impl true
   def handle_call({:join_conversation, conversation_id}, _from, state) do
-    conversation = %{
+    {conversation, messages} = Conversations.get_conversation_and_messages(conversation_id)
+
+    conversation_state = %{
       context: [],
-      history: [],
+      history: messages,
       total_tokens_used: 0
     }
 
-    new_state = %{state | conversations: %{conversation_id => conversation}}
+    new_state = put_in(state[:conversations][conversation_id], conversation_state)
 
     {:reply, :ok, new_state}
   end
