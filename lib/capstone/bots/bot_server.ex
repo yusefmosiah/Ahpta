@@ -55,8 +55,6 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_call({:join_conversation, conversation_id}, _from, state) do
-    # refactor to pass in conversation to join a conversation in progress
-
     conversation = %{
       context: [],
       history: [],

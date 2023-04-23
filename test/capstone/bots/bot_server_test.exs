@@ -12,9 +12,14 @@ defmodule Capstone.Bots.BotServerTest do
   ]
 
   setup do
-    {:ok, pid} = BotServer.start_link(name: :unique_name)
+    {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server(name: :unique_name)
     conversation_id = 1
     BotServer.join_conversation(pid, conversation_id)
+
+    on_exit(fn ->
+      Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
+    end)
+
     {:ok, %{pid: pid, conversation_id: conversation_id}}
   end
 

@@ -203,4 +203,21 @@ defmodule Capstone.Conversations do
       ) do
     ConversationParticipant.changeset(conversation_participant, attrs)
   end
+
+  @doc """
+  Adds a bot to a conversation
+  """
+  def add_bot_to_conversation(conversation_id, bot_id) do
+    conversation = Repo.get!(Conversation, conversation_id)
+    bot = Repo.get!(Bot, bot_id)
+
+    %ConversationParticipant{}
+    |> ConversationParticipant.changeset(%{
+      conversation_id: conversation.id,
+      participant_id: bot.id,
+      participant_type: "bot",
+      owner_permission: false
+    })
+    |> Repo.insert()
+  end
 end

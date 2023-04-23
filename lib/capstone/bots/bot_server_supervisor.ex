@@ -14,4 +14,8 @@ defmodule Capstone.Bots.BotServerSupervisor do
     spec = {Capstone.Bots.BotServer, args}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
+
+  def stop_bot_server(pid) do
+    DynamicSupervisor.terminate_child(__MODULE__, pid)
+  end
 end

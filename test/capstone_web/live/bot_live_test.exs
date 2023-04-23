@@ -10,7 +10,13 @@ defmodule CapstoneWeb.BotLiveTest do
 
   defp create_bot(_) do
     bot = bot_fixture()
-    %{bot: bot}
+    pid = :erlang.binary_to_term(bot.bot_server_pid)
+
+    on_exit(fn ->
+      Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
+    end)
+
+    {:ok, bot: bot}
   end
 
   describe "Index" do
