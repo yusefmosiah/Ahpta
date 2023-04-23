@@ -1,9 +1,7 @@
 defmodule Capstone.Bots.BotServer do
-  @moduledoc """
-  The BotServer.
-  """
   use GenServer
   alias ExOpenAI.Chat
+  alias Phoenix.PubSub
 
   ############################## PUBLIC API ##############################
 
@@ -11,7 +9,7 @@ defmodule Capstone.Bots.BotServer do
     name = opts[:name] || __MODULE__
 
     system_messages =
-      opts[:system_message] ||
+      opts[:system_messages] ||
         [
           %{
             role: "assistant",
@@ -25,89 +23,84 @@ defmodule Capstone.Bots.BotServer do
     GenServer.start_link(__MODULE__, system_messages, name: name)
   end
 
-  @doc """
-  Sends a chat message to the bot server expecting a response. really, should be a cast not GenServer.call.
-  When this bot server gets hooked up to pubsub, the bot will handle a "chat" message and publish its response.
-
-  Handler hanldes a `chat` call to the bot server by calling `do_chat` message valid.
-  If the message length exceeds 15000 characters, the bot server will reply with an error message.
-  The 15000 character limit equals my first approximation of 4000 tokens (~ 3000 words).
-  Further versions will adopt more intelligent token counting, using a tokenizer module.
-  """
-  def chat(pid_or_module \\ __MODULE__, message, model \\ "gpt-3.5-turbo") do
-    GenServer.call(pid_or_module, {:chat, message, model}, 50000)
+  def join_conversation(pid_or_module \\ __MODULE__, conversation_id) do
+    GenServer.call(pid_or_module, {:join_conversation, conversation_id})
   end
 
-  @doc """
-  Gets the `context` of the bot server.
-
-  Handler handles a `get_cotext` call to the bot server.
-  Context, unlike history, gets checkpointd by the bot server to keep within the token limit.
-  Context, like history, includes the system_message(s).
-  """
-  def get_context(pid_or_module \\ __MODULE__) do
-    GenServer.call(pid_or_module, :get_context)
+  def chat(pid_or_module \\ __MODULE__, conversation_id, message, model \\ "gpt-3.5-turbo") do
+    GenServer.cast(pid_or_module, {:chat, conversation_id, message, model})
   end
 
-  @doc """
-  Gets the `history` of the bot server.
-
-  Handler handles a `get_history` call to the bot server.
-  History, unlike context, does not get checkpointd by the bot server.
-  History, like context, includes the system_message(s).
-  """
-  def get_history(pid_or_module \\ __MODULE__) do
-    GenServer.call(pid_or_module, :get_history)
+  def get_context(pid_or_module \\ __MODULE__, conversation_id) do
+    GenServer.call(pid_or_module, {:get_context, conversation_id})
   end
 
-  ######################################## CAlLLBACKS  ########################################
+  def get_history(pid_or_module \\ __MODULE__, conversation_id) do
+    GenServer.call(pid_or_module, {:get_history, conversation_id})
+  end
 
-  @doc """
-  Initializes the bot server.
-  """
+  def get_state(pid_or_module \\ __MODULE__) do
+    GenServer.call(pid_or_module, :get_state)
+  end
+
+  ######################################## CALLBACKS ########################################
+
   @impl true
-  def init([system_messages]) do
-    {:ok,
-     %{
-       system_message: system_messages,
-       context: [],
-       history: [],
-       total_tokens_used: 0
-     }}
+  def init(system_messages) do
+    {:ok, %{system_messages: system_messages, conversations: %{}}}
+  end
+
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
   end
 
   @impl true
-  def handle_call(:get_context, _from, state) do
-    {:reply, [state.context | [state.system_message]] |> List.flatten(), state}
+  def handle_call({:join_conversation, conversation_id}, _from, state) do
+    # refactor to pass in conversation to join a conversation in progress
+
+    conversation = %{
+      context: [],
+      history: [],
+      total_tokens_used: 0
+    }
+
+    new_state = %{state | conversations: %{conversation_id => conversation}}
+
+    {:reply, :ok, new_state}
   end
 
   @impl true
-  def handle_call(:get_history, _from, state) do
-    {:reply, [state.history | [state.system_message]] |> List.flatten(), state}
+  def handle_call({:get_context, conversation_id}, _from, state) do
+    conversation =
+      state.conversations[conversation_id]
+      |> IO.inspect(label: "conversation")
+
+    {:reply, [conversation.context | state.system_messages] |> List.flatten(), state}
   end
 
   @impl true
-  def handle_call({:chat, message, model}, _from, state) do
-    cond do
-      String.length(message) > 15000 ->
-        reply = "Message too long. Please keep it under 3000 words."
-        {:reply, {reply, %{total_tokens: 0}}, state}
+  def handle_call({:get_history, conversation_id}, _from, state) do
+    conversation = state.conversations[conversation_id]
+    {:reply, [conversation.history | state.system_messages] |> List.flatten(), state}
+  end
 
-      String.length(message) <= 15000 ->
-        do_chat(message, model, state)
-    end
+  @impl true
+  def handle_cast({:chat, conversation_id, message, model}, state) do
+    {bot_message, _usage, new_conversation} = do_chat(message, model, state, conversation_id)
+
+    new_state = put_in(state.conversations[conversation_id], new_conversation)
+
+    PubSub.broadcast(Capstone.PubSub, "convo:#{conversation_id}", %{"bot_id" => bot_message})
+
+    {:noreply, new_state}
   end
 
   ############################## PRIVATE FUNCTIONS ##############################
 
-  @doc """
-    do_chat does most of the work for the bot server.
-    It calls the OpenAI API, and handles the response.
-    With an error response, it calls `checkpoint` to checkpoint the context and then calls the API again.
-    Other API errors should be handled as well; context should not be lost because of an API error.
-  """
-  def do_chat(message, model, state) do
-    context = [state.context | [state.system_message]] |> List.flatten()
+  def do_chat(message, model, state, conversation_id) do
+    conversation = state.conversations[conversation_id]
+    IO.inspect(conversation, label: "ccccconversation")
+    context = [conversation.context | state.system_messages] |> List.flatten()
     user_message = %{role: "user", content: message}
 
     msgs = [user_message | context]
@@ -116,46 +109,45 @@ defmodule Capstone.Bots.BotServer do
       {:ok, response} ->
         assistant_msg = unpack({:ok, response})
 
-        new_state = %{
-          state
-          | context: [assistant_msg | [user_message | state.context]],
-            history: [assistant_msg | [user_message | state.history]],
-            total_tokens_used: state.total_tokens_used + response.usage.total_tokens
+        new_conversation = %{
+          conversation
+          | context: [assistant_msg | [user_message | conversation.context]],
+            history: [assistant_msg | [user_message | conversation.history]],
+            total_tokens_used: conversation.total_tokens_used + response.usage.total_tokens
         }
 
-        {:reply, {assistant_msg, response.usage}, new_state}
+        {assistant_msg, response.usage, new_conversation}
 
       {:error, _error} ->
-        {:ok, response} = checkpoint(state.context)
-        Checkpoint = unpack({:ok, response})
-        new_msgs = [user_message | [Checkpoint | [state.system_message]]]
+        {:ok, response} = checkpoint(conversation.context)
+        checkpoint = unpack({:ok, response})
+        new_msgs = [user_message | [checkpoint | state.system_messages]]
 
         {:ok, response2} = Chat.create_chat_completion(new_msgs |> Enum.reverse(), model)
         assistant_msg2 = unpack({:ok, response2})
 
-        new_state = %{
-          state
-          | context: [assistant_msg2 | [user_message | [Checkpoint]]],
-            history: [assistant_msg2 | [user_message | state.history]],
+        new_conversation = %{
+          conversation
+          | context: [assistant_msg2 | [user_message | [checkpoint]]],
+            history: [assistant_msg2 | [user_message | conversation.history]],
             total_tokens_used:
-              state.total_tokens_used + response.usage.total_tokens +
+              conversation.total_tokens_used + response.usage.total_tokens +
                 response2.usage.total_tokens
         }
 
-        {:reply, {assistant_msg2, response2.usage}, new_state}
+        {assistant_msg2, response2.usage, new_conversation}
     end
   end
 
-  @doc """
-  Checkpoints the context of the bot server.
-  Future versions may take a checkpointing prompt as an argument.
-  """
   def checkpoint(context, model \\ "gpt-3.5-turbo") do
     msgs = [
       %{
-        role: "user",
-        content:
-          "Make a checkpoint (aka snapshot, summary) that consisely represents the content of the previous messages, possibly including previous a checkpoint, and begin the checkpoint message with \"Checkpoint:\""
+        role: "system",
+        content: """
+        Make a checkpoint (aka snapshot, summary) that consisely represents the content of the previous messages, possibly including a previous checkpoint.
+        Begin the checkpoint message with "Checkpoint:".
+        Remember, the checkpoint message will be included in the context of the next messages, and the user expects the chat to continue as though the context limit doesn't exist.
+        """
       }
       | context
     ]
