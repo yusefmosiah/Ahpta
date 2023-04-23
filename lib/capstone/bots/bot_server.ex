@@ -1,6 +1,5 @@
 defmodule Capstone.Bots.BotServer do
   use GenServer
-  alias ExOpenAI.Chat
   alias Phoenix.PubSub
 
   ############################## PUBLIC API ##############################
@@ -71,9 +70,7 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_call({:get_context, conversation_id}, _from, state) do
-    conversation =
-      state.conversations[conversation_id]
-      |> IO.inspect(label: "conversation")
+    conversation = state.conversations[conversation_id]
 
     {:reply, [conversation.context | state.system_messages] |> List.flatten(), state}
   end
@@ -99,13 +96,12 @@ defmodule Capstone.Bots.BotServer do
 
   def do_chat(message, model, state, conversation_id) do
     conversation = state.conversations[conversation_id]
-    IO.inspect(conversation, label: "ccccconversation")
     context = [conversation.context | state.system_messages] |> List.flatten()
     user_message = %{role: "user", content: message}
 
     msgs = [user_message | context]
 
-    case Chat.create_chat_completion(msgs |> Enum.reverse(), model) do
+    case chat_module().create_chat_completion(msgs |> Enum.reverse(), model) do
       {:ok, response} ->
         assistant_msg = unpack({:ok, response})
 
@@ -123,7 +119,7 @@ defmodule Capstone.Bots.BotServer do
         checkpoint = unpack({:ok, response})
         new_msgs = [user_message | [checkpoint | state.system_messages]]
 
-        {:ok, response2} = Chat.create_chat_completion(new_msgs |> Enum.reverse(), model)
+        {:ok, response2} = chat_module().create_chat_completion(new_msgs |> Enum.reverse(), model)
         assistant_msg2 = unpack({:ok, response2})
 
         new_conversation = %{
@@ -152,10 +148,14 @@ defmodule Capstone.Bots.BotServer do
       | context
     ]
 
-    Chat.create_chat_completion(msgs |> Enum.reverse(), model)
+    chat_module().create_chat_completion(msgs |> Enum.reverse(), model)
   end
 
   defp unpack({:ok, response}) do
     response.choices |> List.first() |> Map.get(:message)
+  end
+
+  defp chat_module do
+    Application.get_env(:capstone, :chat_module)
   end
 end

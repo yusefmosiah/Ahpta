@@ -20,7 +20,7 @@ defmodule Capstone.Application do
       CapstoneWeb.Endpoint,
       # Start a worker by calling: Capstone.Worker.start_link(arg)
       # {Capstone.Worker, arg}
-      {Capstone.Bots.BotServer, []}
+      Capstone.Bots.BotServerSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

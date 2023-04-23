@@ -30,6 +30,8 @@ config :capstone, CapstoneWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :capstone, Capstone.Mailer, adapter: Swoosh.Adapters.Local
 
+config :capstone, :chat_module, ExOpenAI.Chat
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

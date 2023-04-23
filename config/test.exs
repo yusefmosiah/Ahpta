@@ -26,6 +26,8 @@ config :capstone, CapstoneWeb.Endpoint,
 # In test we don't send emails.
 config :capstone, Capstone.Mailer, adapter: Swoosh.Adapters.Test
 
+config :capstone, :chat_module, MyApp.OpenAIMock
+
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
