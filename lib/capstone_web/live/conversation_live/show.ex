@@ -54,6 +54,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_info(%{event: "new_message"} = message, socket) do
     IO.inspect(message, label: "rrrrreceived message")
 
+    IO.inspect(socket, label: "socket")
     {:noreply, stream_insert(socket, :messages, message.payload)}
   end
 
