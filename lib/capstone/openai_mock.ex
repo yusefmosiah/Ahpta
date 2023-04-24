@@ -1,4 +1,4 @@
-defmodule MyApp.OpenAIMock do
+defmodule Capstone.OpenAIMock do
   def create_chat_completion(_messages, _model) do
     {:ok,
      %{
