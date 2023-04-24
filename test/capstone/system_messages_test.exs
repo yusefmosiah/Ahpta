@@ -8,7 +8,7 @@ defmodule Capstone.SystemMessagesTest do
 
     import Capstone.SystemMessagesFixtures
 
-    @invalid_attrs %{content: nil, timestamp: nil, version: nil}
+    @invalid_attrs %{content: nil, version: nil}
 
     test "list_system_messages/0 returns all system_messages" do
       system_message = system_message_fixture()
@@ -21,13 +21,12 @@ defmodule Capstone.SystemMessagesTest do
     end
 
     test "create_system_message/1 with valid data creates a system_message" do
-      valid_attrs = %{content: "some content", timestamp: ~N[2023-04-13 16:12:00], version: 42}
+      valid_attrs = %{content: "some content", version: 42}
 
       assert {:ok, %SystemMessage{} = system_message} =
                SystemMessages.create_system_message(valid_attrs)
 
       assert system_message.content == "some content"
-      assert system_message.timestamp == ~N[2023-04-13 16:12:00]
       assert system_message.version == 42
     end
 
@@ -40,7 +39,6 @@ defmodule Capstone.SystemMessagesTest do
 
       update_attrs = %{
         content: "some updated content",
-        timestamp: ~N[2023-04-14 16:12:00],
         version: 43
       }
 
@@ -48,7 +46,6 @@ defmodule Capstone.SystemMessagesTest do
                SystemMessages.update_system_message(system_message, update_attrs)
 
       assert system_message.content == "some updated content"
-      assert system_message.timestamp == ~N[2023-04-14 16:12:00]
       assert system_message.version == 43
     end
 

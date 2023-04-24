@@ -33,24 +33,6 @@ defmodule CapstoneWeb.Router do
     live "/bots/:id/edit", BotLive.Index, :edit
     live "/bots/:id", BotLive.Show, :show
     live "/bots/:id/show/edit", BotLive.Show, :edit
-
-    live "/conversation_participants", ConversationParticipantLive.Index, :index
-    live "/conversation_participants/new", ConversationParticipantLive.Index, :new
-    live "/conversation_participants/:id/edit", ConversationParticipantLive.Index, :edit
-    live "/conversation_participants/:id", ConversationParticipantLive.Show, :show
-    live "/conversation_participants/:id/show/edit", ConversationParticipantLive.Show, :edit
-
-    live "/messages", MessageLive.Index, :index
-    live "/messages/new", MessageLive.Index, :new
-    live "/messages/:id/edit", MessageLive.Index, :edit
-    live "/messages/:id", MessageLive.Show, :show
-    live "/messages/:id/show/edit", MessageLive.Show, :edit
-
-    live "/system_messages", SystemMessageLive.Index, :index
-    live "/system_messages/new", SystemMessageLive.Index, :new
-    live "/system_messages/:id/edit", SystemMessageLive.Index, :edit
-    live "/system_messages/:id", SystemMessageLive.Show, :show
-    live "/system_messages/:id/show/edit", SystemMessageLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.

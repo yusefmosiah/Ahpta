@@ -6,7 +6,6 @@ defmodule Capstone.Repo.Migrations.CreateSystemMessages do
       add :id, :binary_id, primary_key: true
       add :content, :text
       add :version, :integer
-      add :timestamp, :naive_datetime
       add :bot_id, references(:bots, on_delete: :nothing, type: :binary_id)
 
       timestamps()

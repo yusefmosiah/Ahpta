@@ -91,7 +91,11 @@ defmodule Capstone.Bots.BotServer do
   @impl true
   def handle_call({:get_history, conversation_id}, _from, state) do
     conversation = state.conversations[conversation_id]
-    {:reply, [conversation.history | state.system_messages] |> List.flatten(), state}
+
+    case conversation.history do
+      :not_found -> {:reply, state.system_messages, state}
+      _ -> {:reply, [conversation.history | state.system_messages] |> List.flatten(), state}
+    end
   end
 
   @impl true

@@ -13,7 +13,8 @@ defmodule Capstone.MessagesFixtures do
       |> Enum.into(%{
         content: "some content",
         message_type: "some message_type",
-        timestamp: ~N[2023-04-13 16:12:00]
+        conversation_id: Ecto.UUID.generate(),
+        sender_id: Ecto.UUID.generate()
       })
       |> Capstone.Messages.create_message()
 

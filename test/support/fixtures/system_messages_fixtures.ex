@@ -12,7 +12,6 @@ defmodule Capstone.SystemMessagesFixtures do
       attrs
       |> Enum.into(%{
         content: "some content",
-        timestamp: ~N[2023-04-13 16:12:00],
         version: 42
       })
       |> Capstone.SystemMessages.create_system_message()
