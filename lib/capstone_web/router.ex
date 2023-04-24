@@ -27,6 +27,7 @@ defmodule CapstoneWeb.Router do
     live "/conversations/:id/edit", ConversationLive.Index, :edit
     live "/conversations/:id", ConversationLive.Show, :show
     live "/conversations/:id/show/edit", ConversationLive.Show, :edit
+    live "/conversations/:id/new_message", ConversationLive.Show, :new_message
 
     live "/bots", BotLive.Index, :index
     live "/bots/new", BotLive.Index, :new

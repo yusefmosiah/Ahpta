@@ -36,12 +36,15 @@ defmodule Capstone.Conversations do
       ** (Ecto.NoResultsError)
 
   """
-  def get_conversation!(id), do: Repo.get!(Conversation, id)
+  def get_conversation!(id) do
+    Repo.get!(Conversation, id)
+    |> Repo.preload(:messages)
+  end
 
   def get_conversation(id) do
     case Repo.get(Conversation, id) do
       nil -> {:error, :not_found}
-      conversation -> {:ok, conversation}
+      conversation -> {:ok, conversation |> Repo.preload(:messages)}
     end
   end
 
