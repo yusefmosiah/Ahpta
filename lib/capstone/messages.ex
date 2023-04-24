@@ -18,13 +18,13 @@ defmodule Capstone.Messages do
 
   """
   def list_messages do
-    Repo.all(Message) |> Repo.preload(:sender_id)
+    Repo.all(Message) |> Repo.preload(:sender)
   end
 
   def list_messages(conversation_id) do
     from(m in Message, where: m.conversation_id == ^conversation_id)
     |> Repo.all()
-    |> Repo.preload(:sender_id)
+    |> Repo.preload(:sender)
   end
 
   @doc """
@@ -41,7 +41,7 @@ defmodule Capstone.Messages do
       ** (Ecto.NoResultsError)
 
   """
-  def get_message!(id), do: Repo.get!(Message, id) |> Repo.preload([:sender, :conversatiion])
+  def get_message!(id), do: Repo.get!(Message, id) |> Repo.preload([:sender, :conversation])
 
   @doc """
   Creates a message.
@@ -58,7 +58,6 @@ defmodule Capstone.Messages do
   def create_message(attrs \\ %{}) do
     %Message{}
     |> Message.changeset(attrs)
-    |> Repo.preload([:sender_id, :conversation_id])
     |> Repo.insert()
   end
 
