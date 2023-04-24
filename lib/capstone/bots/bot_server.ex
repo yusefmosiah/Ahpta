@@ -68,7 +68,7 @@ defmodule Capstone.Bots.BotServer do
   # end
   @impl true
   def handle_call({:join_conversation, conversation_id}, _from, state) do
-    {conversation, messages} = Conversations.get_conversation_and_messages(conversation_id)
+    {_conversation, messages} = Conversations.get_conversation_and_messages(conversation_id)
 
     conversation_state = %{
       context: [],

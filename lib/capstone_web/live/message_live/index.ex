@@ -6,6 +6,7 @@ defmodule CapstoneWeb.MessageLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: CapstoneWeb.Endpoint.subscribe("messages")
     {:ok, stream(socket, :messages, Messages.list_messages())}
   end
 
@@ -35,6 +36,12 @@ defmodule CapstoneWeb.MessageLive.Index do
   @impl true
   def handle_info({CapstoneWeb.MessageLive.FormComponent, {:saved, message}}, socket) do
     {:noreply, stream_insert(socket, :messages, message)}
+  end
+
+  @impl true
+  def handle_info(%{topic: "messages"} = message, socket) do
+    message |> IO.inspect(label: "mmmmMessage")
+    {:noreply, stream_insert(socket, :messages, message.payload)}
   end
 
   @impl true

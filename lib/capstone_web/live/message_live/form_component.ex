@@ -72,6 +72,7 @@ defmodule CapstoneWeb.MessageLive.FormComponent do
   defp save_message(socket, :new, message_params) do
     case Messages.create_message(message_params) do
       {:ok, message} ->
+        CapstoneWeb.Endpoint.broadcast("messages", "new_message", message)
         notify_parent({:saved, message})
 
         {:noreply,
