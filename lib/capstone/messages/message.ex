@@ -18,7 +18,9 @@ defmodule Capstone.Messages.Message do
   @doc false
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:content, :timestamp, :message_type])
-    |> validate_required([:content, :timestamp, :message_type])
+    |> cast(attrs, [:content, :timestamp, :message_type, :sender_id, :conversation_id])
+    |> validate_required([:content, :timestamp, :message_type, :sender_id, :conversation_id])
+    |> foreign_key_constraint(:sender_id)
+    |> foreign_key_constraint(:conversation_id)
   end
 end

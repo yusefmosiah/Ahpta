@@ -4,8 +4,14 @@ defmodule CapstoneWeb.ConversationLive.Show do
   alias Capstone.Conversations
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, socket}
+  def mount(%{"id" => id}, _session, socket) do
+    conversation = Conversations.get_conversation!(id)
+    messages = Capstone.Messages.list_messages(id)
+
+    {:ok,
+     socket
+     |> assign(:conversation, conversation)
+     |> assign(:messages, messages)}
   end
 
   @impl true

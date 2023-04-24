@@ -13,6 +13,18 @@
   <:item title="Is published"><%= @conversation.is_published %></:item>
 </.list>
 
+<div>
+  <h2>Messages:</h2>
+  <ul>
+    <%= for message <- @messages do %>
+      <li>
+        <strong><%= message.sender.username %>:</strong>
+        <%= message.content %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
 <.back navigate={~p"/conversations"}>Back to conversations</.back>
 
 <.modal
