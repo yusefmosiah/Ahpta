@@ -6,8 +6,6 @@ defmodule Capstone.Bots.BotServer do
   ############################## PUBLIC API ##############################
 
   def start_link(opts) do
-    name = opts[:name] || __MODULE__
-
     system_messages =
       opts[:system_messages] ||
         [
@@ -20,27 +18,27 @@ defmodule Capstone.Bots.BotServer do
           }
         ]
 
-    GenServer.start_link(__MODULE__, system_messages, name: name)
+    GenServer.start_link(__MODULE__, system_messages)
   end
 
-  def join_conversation(pid_or_module \\ __MODULE__, conversation_id) do
-    GenServer.call(pid_or_module, {:join_conversation, conversation_id})
+  def join_conversation(pid, conversation_id) do
+    GenServer.call(pid, {:join_conversation, conversation_id})
   end
 
-  def chat(pid_or_module \\ __MODULE__, conversation_id, message, model \\ "gpt-3.5-turbo") do
-    GenServer.cast(pid_or_module, {:chat, conversation_id, message, model})
+  def chat(pid, conversation_id, message, model \\ "gpt-3.5-turbo") do
+    GenServer.cast(pid, {:chat, conversation_id, message, model})
   end
 
-  def get_context(pid_or_module \\ __MODULE__, conversation_id) do
-    GenServer.call(pid_or_module, {:get_context, conversation_id})
+  def get_context(pid, conversation_id) do
+    GenServer.call(pid, {:get_context, conversation_id})
   end
 
-  def get_history(pid_or_module \\ __MODULE__, conversation_id) do
-    GenServer.call(pid_or_module, {:get_history, conversation_id})
+  def get_history(pid, conversation_id) do
+    GenServer.call(pid, {:get_history, conversation_id})
   end
 
-  def get_state(pid_or_module \\ __MODULE__) do
-    GenServer.call(pid_or_module, :get_state)
+  def get_state(pid) do
+    GenServer.call(pid, :get_state)
   end
 
   ######################################## CALLBACKS ########################################
@@ -54,29 +52,18 @@ defmodule Capstone.Bots.BotServer do
     {:reply, state, state}
   end
 
-  # @impl true
-  # def handle_call({:join_conversation, conversation_id}, _from, state) do
-  #   conversation = %{
-  #     context: [],
-  #     history: [],
-  #     total_tokens_used: 0
-  #   }
-
-  #   new_state = %{state | conversations: %{conversation_id => conversation}}
-
-  #   {:reply, :ok, new_state}
-  # end
   @impl true
-  def handle_call({:join_conversation, conversation_id}, _from, state) do
-    {_conversation, messages} = Conversations.get_conversation_and_messages(conversation_id)
+  def handle_call({:join_conversation, conversation}, _from, state) do
+    # {_conversation, messages} = Conversations.get_conversation_and_messages(conversation_id)
+    PubSub.subscribe(Capstone.PubSub, "convo:#{conversation.id}")
 
     conversation_state = %{
       context: [],
-      history: messages,
+      history: conversation.messages,
       total_tokens_used: 0
     }
 
-    new_state = put_in(state[:conversations][conversation_id], conversation_state)
+    new_state = put_in(state[:conversations][conversation.id], conversation_state)
 
     {:reply, :ok, new_state}
   end
@@ -107,6 +94,11 @@ defmodule Capstone.Bots.BotServer do
     PubSub.broadcast(Capstone.PubSub, "convo:#{conversation_id}", %{"bot_id" => bot_message})
 
     {:noreply, new_state}
+  end
+
+  def handle_info(%{event: "new_message"} = message, state) do
+    IO.inspect(message, label: "nnnnew_message")
+    {:noreply, state}
   end
 
   ############################## PRIVATE FUNCTIONS ##############################

@@ -43,8 +43,12 @@ defmodule Capstone.Conversations do
 
   def get_conversation(id) do
     case Repo.get(Conversation, id) do
-      nil -> {:error, :not_found}
-      conversation -> {:ok, conversation |> Repo.preload(:messages)}
+      nil ->
+        {:error, :not_found}
+
+      conversation ->
+        {:ok, conversation |> Repo.preload(:messages)}
+        |> IO.inspect(label: "ggggget_conversation")
     end
   end
 

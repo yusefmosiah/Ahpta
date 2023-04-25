@@ -5,17 +5,25 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   @impl true
   def mount(%{"id" => id}, %{"user_token" => user_token}, socket) do
-    if connected?(socket), do: CapstoneWeb.Endpoint.subscribe("convo:#{id}")
+    if connected?(socket) do
+
+    CapstoneWeb.Endpoint.subscribe("convo:#{id}")
     conversation = Conversations.get_conversation!(id)
-    messages = Capstone.Messages.list_messages(id)
 
     user = Capstone.Accounts.get_user_by_session_token(user_token)
+
+    {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server([])
+    IO.inspect(pid, label: "pid")
+    Capstone.Bots.BotServer.join_conversation(pid, conversation)
 
     {:ok,
      socket
      |> assign(:conversation, conversation)
-     |> assign(:messages, messages)
+     |> assign(:messages, conversation.messages)
      |> assign(:current_user, user)}
+    else
+      {:ok, :socket}
+    end
   end
 
   @impl true
