@@ -69,6 +69,7 @@ defmodule CapstoneWeb.BotLive.FormComponent do
   end
 
   defp save_bot(socket, :new, bot_params) do
+    IO.inspect(bot_params, label: "bot_params")
     case Bots.create_bot(bot_params) do
       {:ok, bot} ->
         notify_parent({:saved, bot})

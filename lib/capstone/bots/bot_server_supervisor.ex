@@ -19,12 +19,11 @@ defmodule Capstone.Bots.BotServerSupervisor do
 
       [] ->
         with {:ok, pid} <- start_bot_server_child([]),
-             :ok <- Registry.register(Capstone.BotRegistry, key, pid) do
+             {:ok, pid} <- Registry.register(Capstone.BotRegistry, key, pid) do
           {:ok, pid}
-        else
-          error -> error
         end
     end
+    |> IO.inspect(label: "llllookup start_bot_server")
   end
 
   defp start_bot_server_child(args) do

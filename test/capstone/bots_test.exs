@@ -34,8 +34,9 @@ defmodule Capstone.BotsTest do
       assert bot.is_available_for_rent == true
       assert bot.name == "different name"
 
-      pid = :erlang.binary_to_term(bot.bot_server_pid)
-      Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
+#       fixme now that bot_server_pid removed
+      # pid = :erlang.binary_to_term(bot.bot_server_pid)
+      # Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
     end
 
     ######## This test fails with the following error:

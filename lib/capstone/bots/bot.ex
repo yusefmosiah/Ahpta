@@ -7,7 +7,6 @@ defmodule Capstone.Bots.Bot do
   schema "bots" do
     field(:is_available_for_rent, :boolean, default: false)
     field(:name, :string)
-    field(:bot_server_pid, :binary)
 
     belongs_to(:owner, Capstone.Accounts.User)
 
@@ -30,7 +29,7 @@ defmodule Capstone.Bots.Bot do
       |> Enum.into(%{})
 
     bot
-    |> cast(atomized_attrs, [:name, :is_available_for_rent, :bot_server_pid])
-    |> validate_required([:name, :is_available_for_rent, :bot_server_pid])
+    |> cast(atomized_attrs, [:name, :is_available_for_rent])
+    |> validate_required([:name, :is_available_for_rent])
   end
 end
