@@ -18,7 +18,7 @@ defmodule Capstone.Messages do
 
   """
   def list_messages do
-    Repo.all(Message) |> Repo.preload(:sender)
+    Repo.all(Message)
   end
 
   def list_messages(conversation_id) do
@@ -58,10 +58,11 @@ defmodule Capstone.Messages do
   def create_message(attrs \\ %{}) do
     %Message{}
     |> Message.changeset(attrs)
+    # |> Repo.preload(:sender) # ** (UndefinedFunctionError) function Ecto.Changeset.__schema__/2 is undefined or private
     |> Repo.insert()
   end
 
-  
+
 
   @doc """
   Updates a message.

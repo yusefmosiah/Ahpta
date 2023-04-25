@@ -48,7 +48,6 @@ defmodule Capstone.Conversations do
 
       conversation ->
         {:ok, conversation |> Repo.preload(:messages)}
-        |> IO.inspect(label: "ggggget_conversation")
     end
   end
 

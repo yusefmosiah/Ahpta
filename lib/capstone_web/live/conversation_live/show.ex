@@ -10,7 +10,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
       conversation = Conversations.get_conversation!(id)
 
       {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server([])
-      IO.inspect(pid, label: "pid")
       Capstone.Bots.BotServer.join_conversation(pid, conversation)
 
       user = Capstone.Accounts.get_user_by_session_token(user_token)
@@ -33,14 +32,12 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   @impl true
   def handle_event("new_message", %{"message" => message_params} = message, socket) do
-    IO.inspect(message_params, label: "hhhhhandle_event message_params")
     IO.inspect(message, label: "hhhhhandle_event message")
 
     attrs =
       message_params
       |> Map.put("conversation_id", socket.assigns.conversation.id)
       |> Map.put("sender_id", socket.assigns.current_user.id)
-      |> IO.inspect(label: "aaaatrs sage_params")
 
     case Capstone.Messages.create_message(attrs) do
       {:ok, message} ->
@@ -51,11 +48,13 @@ defmodule CapstoneWeb.ConversationLive.Show do
           message
         )
 
-        {:noreply, socket}
+        {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
 
       {:error, reason} ->
         IO.inspect(reason, label: "rrrrreason")
         {:noreply, socket}
+
+
     end
   end
 

@@ -47,7 +47,6 @@ defmodule CapstoneWeb.MessageLive.Index do
 
   @impl true
   def handle_info(%{topic: "messages"} = message, socket) do
-    message |> IO.inspect(label: "mmmmMessage")
     {:noreply, stream_insert(socket, :messages, message.payload)}
   end
 
