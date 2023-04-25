@@ -45,27 +45,31 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_event("new_message", %{"message" => message_params} = message, socket) do
     IO.inspect(message, label: "hhhhhandle_event message")
 
-    socket.assigns.bot_server_pids
-    |> Enum.each(fn pid ->
-      BotServer.chat(
-        pid,
-        message_params["content"],
-        socket.assigns.conversation.id,
-        socket.assigns.current_user.id
-      )
-    end)
+    case Capstone.Messages.create_message(attrs) do
+      {:ok, message} ->
+        socket.assigns.bot_server_pids
+        |> Enum.each(fn pid ->
+          BotServer.chat(
+            pid,
+            message_params["content"],
+            socket.assigns.conversation.id,
+            socket.assigns.current_user.id
+          )
+        end)
 
-    {:ok, message} = Capstone.Messages.create_message(message_params)
+        CapstoneWeb.Endpoint.broadcast_from(
+          self(),
+          "convo:#{socket.assigns.conversation.id}",
+          "new_message",
+          message
+        )
 
+        {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
 
-    CapstoneWeb.Endpoint.broadcast_from(
-      self(),
-      "convo:#{socket.assigns.conversation.id}",
-      "new_message",
-      message
-    )
-
-    {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
+      {:error, reason} ->
+        IO.inspect(reason, label: "rrrrreason")
+        {:noreply, socket}
+    end
   end
 
   @impl true
