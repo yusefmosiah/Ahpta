@@ -51,19 +51,8 @@ defmodule Capstone.Bots do
 
   """
   def create_bot(attrs \\ %{}) do
-    name = attrs[:name]
-
-    {:ok, pid} =
-      if name && String.trim(name) != "" do
-        BotServerSupervisor.start_bot_server(name: String.to_atom(name))
-      else
-        BotServerSupervisor.start_bot_server([])
-      end
-
-    attrs_with_pid = Map.put(attrs, :bot_server_pid, pid |> :erlang.term_to_binary())
-
     %Bot{}
-    |> Bot.changeset(attrs_with_pid)
+    |> Bot.changeset(attrs)
     |> Repo.insert()
   end
 

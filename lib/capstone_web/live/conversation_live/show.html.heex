@@ -18,8 +18,8 @@
   <ul>
     <%= for message  <- @messages do %>
       <li>
-        <strong><%= message.sender_id %>:</strong>
-        <%= message.content %>
+        <strong><%= inspect(message) %>:</strong>
+        <%= "content" %>
       </li>
     <% end %>
   </ul>

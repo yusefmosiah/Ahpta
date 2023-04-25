@@ -10,7 +10,24 @@ defmodule Capstone.Bots.BotServerSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  def start_bot_server(args) do
+  def start_bot_server(bot_id) do
+    key = bot_id
+
+    case Registry.lookup(CapstoneWeb.BotRegistry, key) do
+      [{pid, _key}] ->
+        {:ok, pid}
+
+      [] ->
+        with {:ok, pid} <- start_bot_server_child([]),
+             :ok <- Registry.register(CapstoneWeb.BotRegistry, key, pid) do
+          {:ok, pid}
+        else
+          error -> error
+        end
+    end
+  end
+
+  defp start_bot_server_child(args) do
     spec = {Capstone.Bots.BotServer, args}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end

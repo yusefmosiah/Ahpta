@@ -5,13 +5,22 @@ defmodule CapstoneWeb.ConversationLive.Show do
   alias Capstone.Bots.BotServer
 
   @impl true
-  def mount(%{"id" => id}, %{"user_token" => user_token}, socket) do
-    if connected?(socket) do
-      CapstoneWeb.Endpoint.subscribe("convo:#{id}")
+  def mount(%{"id" => id}, session, socket) do
+    user_token = Map.get(session, "user_token")
+    if connected?(socket), do: CapstoneWeb.Endpoint.subscribe("convo:#{id}")
+
+    if connected?(socket) && user_token do
       conversation = Conversations.get_conversation!(id)
 
-      {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server([])
-      Capstone.Bots.BotServer.join_conversation(pid, conversation)
+      pids =
+        Conversations.get_bots_in_conversation(conversation.id)
+        |> Enum.map(fn bot_id ->
+          {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server(bot_id)
+          pid
+        end)
+
+      pids
+      |> Enum.each(fn pid -> Capstone.Bots.BotServer.join_conversation(pid, conversation) end)
 
       user = Capstone.Accounts.get_user_by_session_token(user_token)
 
@@ -20,7 +29,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
        |> assign(:conversation, conversation)
        |> assign(:messages, conversation.messages)
        |> assign(:current_user, user)
-       |> assign(:bot_server_pid, pid)}
+       |> assign(:bot_server_pids, pids)}
     end
   end
 
@@ -36,12 +45,18 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_event("new_message", %{"message" => message_params} = message, socket) do
     IO.inspect(message, label: "hhhhhandle_event message")
 
-    BotServer.chat(
-      socket.assigns.bot_server_pid,
-      message_params["content"],
-      socket.assigns.conversation.id,
-      socket.assigns.current_user.id
-    )
+    socket.assigns.bot_server_pids
+    |> Enum.each(fn pid ->
+      BotServer.chat(
+        pid,
+        message_params["content"],
+        socket.assigns.conversation.id,
+        socket.assigns.current_user.id
+      )
+    end)
+
+    {:ok, message} = Capstone.Messages.create_message(message_params)
+
 
     CapstoneWeb.Endpoint.broadcast_from(
       self(),

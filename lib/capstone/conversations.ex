@@ -56,11 +56,11 @@ defmodule Capstone.Conversations do
 
   ## Examples
 
-      iex> create_conversation(%{field: value})
-      {:ok, %Conversation{}}
+  iex> create_conversation(%{field: value})
+  {:ok, %Conversation{}}
 
-      iex> create_conversation(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  iex> create_conversation(%{field: bad_value})
+  {:error, %Ecto.Changeset{}}
 
   """
   def create_conversation(attrs \\ %{}) do
@@ -74,11 +74,11 @@ defmodule Capstone.Conversations do
 
   ## Examples
 
-      iex> update_conversation(conversation, %{field: new_value})
-      {:ok, %Conversation{}}
+  iex> update_conversation(conversation, %{field: new_value})
+  {:ok, %Conversation{}}
 
-      iex> update_conversation(conversation, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  iex> update_conversation(conversation, %{field: bad_value})
+  {:error, %Ecto.Changeset{}}
 
   """
   def update_conversation(%Conversation{} = conversation, attrs) do
@@ -92,11 +92,11 @@ defmodule Capstone.Conversations do
 
   ## Examples
 
-      iex> delete_conversation(conversation)
-      {:ok, %Conversation{}}
+  iex> delete_conversation(conversation)
+  {:ok, %Conversation{}}
 
-      iex> delete_conversation(conversation)
-      {:error, %Ecto.Changeset{}}
+  iex> delete_conversation(conversation)
+  {:error, %Ecto.Changeset{}}
 
   """
   def delete_conversation(%Conversation{} = conversation) do
@@ -108,8 +108,8 @@ defmodule Capstone.Conversations do
 
   ## Examples
 
-      iex> change_conversation(conversation)
-      %Ecto.Changeset{data: %Conversation{}}
+  iex> change_conversation(conversation)
+  %Ecto.Changeset{data: %Conversation{}}
 
   """
   def change_conversation(%Conversation{} = conversation, attrs \\ %{}) do
@@ -119,12 +119,25 @@ defmodule Capstone.Conversations do
   alias Capstone.Conversations.ConversationParticipant
 
   @doc """
+  Gets all bots in single conversation.
+  """
+  def get_bots_in_conversation(conversation_id) do
+    from(cp in ConversationParticipant,
+      where:
+        cp.conversation_id == ^conversation_id and
+          cp.participant_type == "bot"
+    )
+    |> Repo.all()
+    |> Enum.map(fn cp -> cp.bot_id end)
+  end
+
+  @doc """
   Returns the list of conversation_participants.
 
   ## Examples
 
-      iex> list_conversation_participants()
-      [%ConversationParticipant{}, ...]
+  iex> list_conversation_participants()
+  [%ConversationParticipant{}, ...]
 
   """
   def list_conversation_participants do
