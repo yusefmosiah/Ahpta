@@ -87,16 +87,18 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_cast({:chat, message, conversation_id, sender_id, model}, state) do
-    {bot_message, _usage, new_conversation} = do_chat(message, model, state, conversation_id)
+    IO.inspect(message, label: "mmmmmmessage")
+    {bot_message_raw, _usage, new_conversation} = do_chat(message, model, state, conversation_id)
 
     new_state = put_in(state.conversations[conversation_id], new_conversation)
 
-    Capstone.Messages.create_message(%{
-      "conversation_id" => conversation_id,
-      "sender_id" => sender_id,
-      "content" => bot_message.content,
-      "message_type" => "bot"
-    })
+    {:ok, bot_message} =
+      Capstone.Messages.create_message(%{
+        "conversation_id" => conversation_id,
+        "sender_id" => sender_id,
+        "content" => bot_message_raw.content,
+        "message_type" => "bot"
+      })
 
     PubSub.broadcast_from(Capstone.PubSub, self(), "convo:#{conversation_id}", %{
       "bot_message" => bot_message

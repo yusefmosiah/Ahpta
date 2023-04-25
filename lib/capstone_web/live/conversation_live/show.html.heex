@@ -16,10 +16,10 @@
 <div>
   <h2>Messages:</h2>
   <ul>
-    <%= for message  <- @messages do %>
+    <%= for message <- @messages do %>
       <li>
-        <strong><%= inspect(message) %>:</strong>
-        <%= "content" %>
+        <strong><%= message.sender_id %>:</strong>
+        <%= message.content %>
       </li>
     <% end %>
   </ul>

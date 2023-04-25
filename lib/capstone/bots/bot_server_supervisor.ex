@@ -13,13 +13,13 @@ defmodule Capstone.Bots.BotServerSupervisor do
   def start_bot_server(bot_id) do
     key = bot_id
 
-    case Registry.lookup(CapstoneWeb.BotRegistry, key) do
+    case Registry.lookup(Capstone.BotRegistry, key) do
       [{pid, _key}] ->
         {:ok, pid}
 
       [] ->
         with {:ok, pid} <- start_bot_server_child([]),
-             :ok <- Registry.register(CapstoneWeb.BotRegistry, key, pid) do
+             :ok <- Registry.register(Capstone.BotRegistry, key, pid) do
           {:ok, pid}
         else
           error -> error

@@ -45,9 +45,18 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_event("new_message", %{"message" => message_params} = message, socket) do
     IO.inspect(message, label: "hhhhhandle_event message")
 
+    attrs =
+      message_params
+      |> Map.put("conversation_id", socket.assigns.conversation.id)
+      |> Map.put("sender_id", socket.assigns.current_user.id)
+      |> IO.inspect(label: "aaaatrs sage_params")
+
     case Capstone.Messages.create_message(attrs) do
       {:ok, message} ->
+        IO.inspect(message, label: "mmmmmessage")
+
         socket.assigns.bot_server_pids
+        |> IO.inspect(label: "sssssocket.assigns.bot_server_pids")
         |> Enum.each(fn pid ->
           BotServer.chat(
             pid,
@@ -60,7 +69,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         CapstoneWeb.Endpoint.broadcast_from(
           self(),
           "convo:#{socket.assigns.conversation.id}",
-          "new_message",
+          "saved_message",
           message
         )
 
@@ -73,7 +82,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   @impl true
-  def handle_info(%{event: "new_message"} = message, socket) do
+  def handle_info(%{event: "saved_message"} = message, socket) do
     IO.inspect(message, label: "rrrrreceived message")
 
     {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message.payload])}
