@@ -26,7 +26,7 @@ defmodule Capstone.Bots.BotServer do
   end
 
   def chat(pid, message, conversation_id, sender_id, model \\ "gpt-3.5-turbo") do
-    GenServer.cast(pid, {:chat, conversation_id, sender_id, message, model})
+    GenServer.cast(pid, {:chat, message, conversation_id, sender_id, model})
   end
 
   def get_context(pid, conversation_id) do
@@ -108,15 +108,6 @@ defmodule Capstone.Bots.BotServer do
   end
 
   def handle_info(%{event: "new_message", payload: payload} = message, state) do
-    # {bot_message, _usage, new_conversation} =
-    #   do_chat(payload, "gpt-3.5-turbo", state, payload.conversation_id)
-
-    # new_state = put_in(state.conversations[payload.conversation_id], new_conversation)
-
-    # PubSub.broadcast_from(Capstone.PubSub, self(), "convo:#{payload.conversation_id}", %{
-    #   "bot_message" => bot_message
-    # })
-
     {:noreply, state}
   end
 
@@ -132,7 +123,7 @@ defmodule Capstone.Bots.BotServer do
     IO.inspect(state, label: "ssssstate")
     conversation = state.conversations[conversation_id]
     context = [conversation.context | state.system_messages] |> List.flatten()
-    user_message = %{role: "user", content: message.content}
+    user_message = %{role: "user", content: message}
 
     msgs = [user_message | context]
 

@@ -18,7 +18,13 @@ defmodule Capstone.Conversations.ConversationParticipant do
   @doc false
   def changeset(conversation_participant, attrs) do
     conversation_participant
-    |> cast(attrs, [:participant_type, :owner_permission])
-    |> validate_required([:participant_type, :owner_permission])
+    |> cast(attrs, [
+      :participant_type,
+      :owner_permission,
+      :conversation_id,
+      :participant_id,
+      :bot_id
+    ])
+    |> validate_required([:participant_type, :owner_permission, :conversation_id])
   end
 end

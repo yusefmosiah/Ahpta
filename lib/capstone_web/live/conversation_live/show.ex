@@ -7,29 +7,45 @@ defmodule CapstoneWeb.ConversationLive.Show do
   @impl true
   def mount(%{"id" => id}, session, socket) do
     user_token = Map.get(session, "user_token")
+    conversation = Conversations.get_conversation!(id)
+
     if connected?(socket), do: CapstoneWeb.Endpoint.subscribe("convo:#{id}")
 
     if connected?(socket) && user_token do
-      conversation = Conversations.get_conversation!(id)
+      user = Capstone.Accounts.get_user_by_session_token(user_token)
+      bots = Capstone.Bots.get_bots_by_availability_and_ownership(user.id)
 
       pids =
-        Conversations.get_bots_in_conversation(conversation.id)
+        Conversations.get_bots_in_conversation(id)
+        |> IO.inspect(label: "boooooot ids")
         |> Enum.map(fn bot_id ->
+          IO.inspect(bot_id, label: "bbbbot id")
           {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server(bot_id)
           pid
         end)
 
+      IO.inspect(pids, label: "bot ppppids")
+      IO.inspect(self(), label: "seeeeeeelf pid")
+
       pids
       |> Enum.each(fn pid -> Capstone.Bots.BotServer.join_conversation(pid, conversation) end)
-
-      user = Capstone.Accounts.get_user_by_session_token(user_token)
 
       {:ok,
        socket
        |> assign(:conversation, conversation)
        |> assign(:messages, conversation.messages)
        |> assign(:current_user, user)
-       |> assign(:bot_server_pids, pids)}
+       |> assign(:bot_server_pids, pids)
+       |> assign(
+         :available_bots,
+         bots.availables_owned_by_user ++ bots.availables_not_owned_by_user
+       )}
+    else
+      {:ok,
+       socket
+       |> assign(:conversation, conversation)
+       |> assign(:messages, conversation.messages)
+       |> assign(:available_bots, [])}
     end
   end
 
@@ -74,6 +90,36 @@ defmodule CapstoneWeb.ConversationLive.Show do
         )
 
         {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
+
+      {:error, reason} ->
+        IO.inspect(reason, label: "rrrrreason")
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("add_bot", %{"bot_id" => bot_id}, socket) do
+    Conversations.get_bots_in_conversation(socket.assigns.conversation.id)
+    |> IO.inspect(label: "b4 add cp")
+
+    attrs =
+      %{
+        "conversation_id" => socket.assigns.conversation.id,
+        "participant_id" => nil,
+        "bot_id" => bot_id,
+        "participant_type" => "bot",
+        "owner_permission" => "true"
+      }
+      |> IO.inspect(label: "aaaaattttrs")
+
+    case Capstone.Conversations.create_conversation_participant(attrs) do
+      {:ok, conversation_participant} ->
+        IO.inspect(conversation_participant, label: "ccccconversation_participant")
+
+        Conversations.get_bots_in_conversation(socket.assigns.conversation.id)
+        |> IO.inspect(label: "after add cp")
+
+        {:noreply, socket}
 
       {:error, reason} ->
         IO.inspect(reason, label: "rrrrreason")

@@ -22,6 +22,29 @@ defmodule Capstone.Bots do
     Repo.all(Bot)
   end
 
+  def get_bots_by_availability_and_ownership(user_id) do
+    all_bots = Repo.all(Bot)
+
+    unavailables =
+      Enum.filter(all_bots, fn bot -> bot.is_available_for_rent == false end)
+
+    availables =
+      Enum.filter(all_bots, fn bot -> bot.is_available_for_rent == true end)
+
+    availables_not_owned_by_user =
+      Enum.filter(availables, fn bot -> bot.owner_id != user_id end)
+
+    availables_owned_by_user =
+      Enum.filter(availables, fn bot -> bot.owner_id == user_id end)
+
+    %{
+      unavailables: unavailables,
+      availables_not_owned_by_user: availables_not_owned_by_user,
+      availables_owned_by_user: availables_owned_by_user
+    }
+  end
+
+
   @doc """
   Gets a single bot.
 

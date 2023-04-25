@@ -14,6 +14,19 @@
 </.list>
 
 <div>
+  <h2>Add a Bot to the Conversation:</h2>
+  <form phx-submit="add_bot">
+    <label for="bot_id">Select a Bot:</label>
+    <select name="bot_id" id="bot_id">
+      <%= for bot <- @available_bots do %>
+        <option value={bot.id}><%= bot.name %></option>
+      <% end %>
+    </select>
+    <button type="submit">Add Bot</button>
+  </form>
+</div>
+
+<div>
   <h2>Messages:</h2>
   <ul>
     <%= for message <- @messages do %>

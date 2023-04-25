@@ -19,14 +19,14 @@ defmodule Capstone.Bots.BotServerSupervisor do
 
       [] ->
         with {:ok, pid} <- start_bot_server_child([]),
-             {:ok, pid} <- Registry.register(Capstone.BotRegistry, key, pid) do
+             {:ok, _registry_pid} <- Registry.register(Capstone.BotRegistry, key, pid) do
           {:ok, pid}
         end
     end
     |> IO.inspect(label: "llllookup start_bot_server")
   end
 
-  defp start_bot_server_child(args) do
+  def start_bot_server_child(args) do
     spec = {Capstone.Bots.BotServer, args}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
