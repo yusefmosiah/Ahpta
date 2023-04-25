@@ -21,7 +21,12 @@ defmodule CapstoneWeb.MessageLive.FormComponent do
       >
         <.input field={@form[:content]} type="text" label="Content" />
         <.input field={@form[:message_type]} type="text" label="Message type" />
-        <.input type="hidden" field={@form[:conversation_id]} value={@conversation_id} label="conversation_id" />
+        <.input
+          type="hidden"
+          field={@form[:conversation_id]}
+          value={@conversation_id}
+          label="conversation_id"
+        />
         <:actions>
           <.button phx-disable-with="Saving...">Save Message</.button>
         </:actions>
@@ -71,6 +76,8 @@ defmodule CapstoneWeb.MessageLive.FormComponent do
   end
 
   defp save_message(socket, :new, message_params) do
+    IO.inspect(message_params, label: "mmmmmessage_params")
+
     case Messages.create_message(message_params) do
       {:ok, message} ->
         CapstoneWeb.Endpoint.broadcast("messages", "new_message", message)

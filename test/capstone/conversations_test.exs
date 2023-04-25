@@ -16,7 +16,7 @@ defmodule Capstone.ConversationsTest do
     end
 
     test "get_conversation!/1 returns the conversation with given id" do
-      conversation = conversation_fixture()
+      conversation = conversation_fixture() |> Repo.preload(:messages)
       assert Conversations.get_conversation!(conversation.id) == conversation
     end
 
@@ -51,7 +51,8 @@ defmodule Capstone.ConversationsTest do
       assert {:error, %Ecto.Changeset{}} =
                Conversations.update_conversation(conversation, @invalid_attrs)
 
-      assert conversation == Conversations.get_conversation!(conversation.id)
+      assert conversation |> Repo.preload(:messages) ==
+               Conversations.get_conversation!(conversation.id)
     end
 
     test "delete_conversation/1 deletes the conversation" do

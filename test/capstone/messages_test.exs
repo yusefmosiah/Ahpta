@@ -39,7 +39,7 @@ defmodule Capstone.MessagesTest do
         sender_id: user.id
       }
 
-      message = message_fixture(valid_attrs)
+      message = message_fixture(valid_attrs) |> Repo.preload([:sender, :conversation])
       assert Messages.get_message!(message.id) == message
     end
 
@@ -99,7 +99,9 @@ defmodule Capstone.MessagesTest do
 
       message = message_fixture(valid_attrs)
       assert {:error, %Ecto.Changeset{}} = Messages.update_message(message, @invalid_attrs)
-      assert message == Messages.get_message!(message.id)
+
+      assert message |> Repo.preload([:sender, :conversation]) ==
+               Messages.get_message!(message.id)
     end
 
     test "delete_message/1 deletes the message" do

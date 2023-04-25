@@ -62,8 +62,6 @@ defmodule Capstone.Messages do
     |> Repo.insert()
   end
 
-
-
   @doc """
   Updates a message.
 

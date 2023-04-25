@@ -5,7 +5,6 @@
     <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit conversation</.button>
     </.link>
-
   </:actions>
 </.header>
 
@@ -29,8 +28,15 @@
   <h2>New Message:</h2>
   <form phx-submit="new_message">
     <label for="content">Content:</label>
-    <input type="text" id="content" name="message[content]" required>
-    <input type="hidden" type="text" id="message_type" name="message[message_type]" value="human" required>
+    <input type="text" id="content" name="message[content]" required />
+    <input
+      type="hidden"
+      type="text"
+      id="message_type"
+      name="message[message_type]"
+      value="human"
+      required
+    />
     <button type="submit">Send</button>
   </form>
 </div>

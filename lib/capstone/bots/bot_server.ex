@@ -21,12 +21,12 @@ defmodule Capstone.Bots.BotServer do
     GenServer.start_link(__MODULE__, system_messages)
   end
 
-  def join_conversation(pid, conversation_id) do
-    GenServer.call(pid, {:join_conversation, conversation_id})
+  def join_conversation(pid, conversation) do
+    GenServer.call(pid, {:join_conversation, conversation})
   end
 
-  def chat(pid, conversation_id, message, model \\ "gpt-3.5-turbo") do
-    GenServer.cast(pid, {:chat, conversation_id, message, model})
+  def chat(pid, message, conversation_id, sender_id, model \\ "gpt-3.5-turbo") do
+    GenServer.cast(pid, {:chat, conversation_id, sender_id, message, model})
   end
 
   def get_context(pid, conversation_id) do
@@ -55,7 +55,7 @@ defmodule Capstone.Bots.BotServer do
   @impl true
   def handle_call({:join_conversation, conversation}, _from, state) do
     # {_conversation, messages} = Conversations.get_conversation_and_messages(conversation_id)
-    PubSub.subscribe(Capstone.PubSub, "convo:#{conversation.id}")
+    # PubSub.subscribe(Capstone.PubSub, "convo:#{conversation.id}")
 
     conversation_state = %{
       context: [],
@@ -86,40 +86,53 @@ defmodule Capstone.Bots.BotServer do
   end
 
   @impl true
-  def handle_cast({:chat, conversation_id, message, model}, state) do
+  def handle_cast({:chat, message, conversation_id, sender_id, model}, state) do
     {bot_message, _usage, new_conversation} = do_chat(message, model, state, conversation_id)
 
     new_state = put_in(state.conversations[conversation_id], new_conversation)
 
-    PubSub.broadcast(Capstone.PubSub, "convo:#{conversation_id}", %{"bot_id" => bot_message})
+    Capstone.Messages.create_message(%{
+      "conversation_id" => conversation_id,
+      "sender_id" => sender_id,
+      "content" => bot_message.content,
+      "message_type" => "bot"
+    })
 
-    {:noreply, new_state}
-  end
-
-  def handle_info(%{event: "new_message", payload: payload} = message, state) do
-
-    {bot_message, _usage, new_conversation} =
-      do_chat(payload, "gpt-3.5-turbo", state, payload.conversation_id)
-
-    new_state =
-      put_in(state.conversations[payload.conversation_id], new_conversation)
-
-    PubSub.broadcast_from(Capstone.PubSub, self(), "convo:#{payload.conversation_id}", %{
+    PubSub.broadcast_from(Capstone.PubSub, self(), "convo:#{conversation_id}", %{
       "bot_message" => bot_message
     })
 
     {:noreply, new_state}
   end
 
+  def handle_info(%{event: "new_message", payload: payload} = message, state) do
+    # {bot_message, _usage, new_conversation} =
+    #   do_chat(payload, "gpt-3.5-turbo", state, payload.conversation_id)
+
+    # new_state = put_in(state.conversations[payload.conversation_id], new_conversation)
+
+    # PubSub.broadcast_from(Capstone.PubSub, self(), "convo:#{payload.conversation_id}", %{
+    #   "bot_message" => bot_message
+    # })
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{"bot_message" => message}, state) do
+    IO.inspect(message, label: "bbbbbot_message")
+    {:noreply, state}
+  end
+
   ############################## PRIVATE FUNCTIONS ##############################
 
   def do_chat(message, model, state, conversation_id) do
+    IO.inspect(conversation_id, label: "ccccconversation_id")
+    IO.inspect(state, label: "ssssstate")
     conversation = state.conversations[conversation_id]
     context = [conversation.context | state.system_messages] |> List.flatten()
     user_message = %{role: "user", content: message.content}
 
-    msgs =
-      [user_message | context]
+    msgs = [user_message | context]
 
     case chat_module().create_chat_completion(msgs |> Enum.reverse(), model) do
       {:ok, %{choices: [%{message: assistant_msg}]} = response} ->

@@ -2,6 +2,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   use CapstoneWeb, :live_view
 
   alias Capstone.Conversations
+  alias Capstone.Bots.BotServer
 
   @impl true
   def mount(%{"id" => id}, %{"user_token" => user_token}, socket) do
@@ -18,7 +19,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
        socket
        |> assign(:conversation, conversation)
        |> assign(:messages, conversation.messages)
-       |> assign(:current_user, user)}
+       |> assign(:current_user, user)
+       |> assign(:bot_server_pid, pid)}
     end
   end
 
@@ -34,28 +36,21 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_event("new_message", %{"message" => message_params} = message, socket) do
     IO.inspect(message, label: "hhhhhandle_event message")
 
-    attrs =
-      message_params
-      |> Map.put("conversation_id", socket.assigns.conversation.id)
-      |> Map.put("sender_id", socket.assigns.current_user.id)
+    BotServer.chat(
+      socket.assigns.bot_server_pid,
+      message_params["content"],
+      socket.assigns.conversation.id,
+      socket.assigns.current_user.id
+    )
 
-    case Capstone.Messages.create_message(attrs) do
-      {:ok, message} ->
-        CapstoneWeb.Endpoint.broadcast_from(
-          self(),
-          "convo:#{socket.assigns.conversation.id}",
-          "new_message",
-          message
-        )
+    CapstoneWeb.Endpoint.broadcast_from(
+      self(),
+      "convo:#{socket.assigns.conversation.id}",
+      "new_message",
+      message
+    )
 
-        {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
-
-      {:error, reason} ->
-        IO.inspect(reason, label: "rrrrreason")
-        {:noreply, socket}
-
-
-    end
+    {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
   end
 
   @impl true
