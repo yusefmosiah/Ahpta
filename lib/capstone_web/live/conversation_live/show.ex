@@ -6,23 +6,20 @@ defmodule CapstoneWeb.ConversationLive.Show do
   @impl true
   def mount(%{"id" => id}, %{"user_token" => user_token}, socket) do
     if connected?(socket) do
+      CapstoneWeb.Endpoint.subscribe("convo:#{id}")
+      conversation = Conversations.get_conversation!(id)
 
-    CapstoneWeb.Endpoint.subscribe("convo:#{id}")
-    conversation = Conversations.get_conversation!(id)
+      {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server([])
+      IO.inspect(pid, label: "pid")
+      Capstone.Bots.BotServer.join_conversation(pid, conversation)
 
-    user = Capstone.Accounts.get_user_by_session_token(user_token)
+      user = Capstone.Accounts.get_user_by_session_token(user_token)
 
-    {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server([])
-    IO.inspect(pid, label: "pid")
-    Capstone.Bots.BotServer.join_conversation(pid, conversation)
-
-    {:ok,
-     socket
-     |> assign(:conversation, conversation)
-     |> assign(:messages, conversation.messages)
-     |> assign(:current_user, user)}
-    else
-      {:ok, :socket}
+      {:ok,
+       socket
+       |> assign(:conversation, conversation)
+       |> assign(:messages, conversation.messages)
+       |> assign(:current_user, user)}
     end
   end
 
@@ -35,7 +32,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   @impl true
-  def handle_event("new_message", %{"message" => message_params}, socket) do
+  def handle_event("new_message", %{"message" => message_params} = message, socket) do
+    IO.inspect(message_params, label: "hhhhhandle_event message_params")
+    IO.inspect(message, label: "hhhhhandle_event message")
+
     attrs =
       message_params
       |> Map.put("conversation_id", socket.assigns.conversation.id)
@@ -44,7 +44,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
     case Capstone.Messages.create_message(attrs) do
       {:ok, message} ->
-        CapstoneWeb.Endpoint.broadcast(
+        CapstoneWeb.Endpoint.broadcast_from(
+          self(),
           "convo:#{socket.assigns.conversation.id}",
           "new_message",
           message
@@ -62,8 +63,22 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_info(%{event: "new_message"} = message, socket) do
     IO.inspect(message, label: "rrrrreceived message")
 
-    IO.inspect(socket, label: "socket")
     {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message.payload])}
+  end
+
+  @impl true
+  def handle_info(%{"bot_message" => payload} = message, socket) do
+    IO.inspect(message, label: "xxxxx message")
+
+    {:ok, new_message} =
+      Capstone.Messages.create_message(%{
+        "conversation_id" => socket.assigns.conversation.id,
+        "sender_id" => socket.assigns.current_user.id,
+        "content" => payload.content,
+        "message_type" => "bot"
+      })
+
+    {:noreply, assign(socket, :messages, socket.assigns.messages ++ [new_message])}
   end
 
   defp page_title(:show), do: "Show Conversation"

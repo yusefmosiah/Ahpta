@@ -96,24 +96,38 @@ defmodule Capstone.Bots.BotServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{event: "new_message"} = message, state) do
-    IO.inspect(message, label: "nnnnew_message")
-    {:noreply, state}
+  def handle_info(%{event: "new_message", payload: payload} = message, state) do
+    IO.inspect(message, label: "in handle_info new_message")
+
+    {bot_message, _usage, new_conversation} =
+      do_chat(payload, "gpt-3.5-turbo", state, payload.conversation_id)
+
+    new_state =
+      put_in(state.conversations[payload.conversation_id], new_conversation)
+      |> IO.inspect(label: "nnnnew_state")
+
+    PubSub.broadcast_from(Capstone.PubSub, self(), "convo:#{payload.conversation_id}", %{
+      "bot_message" => bot_message
+    })
+
+    IO.inspect(bot_message, label: "bbbbot_message")
+    {:noreply, new_state}
   end
 
   ############################## PRIVATE FUNCTIONS ##############################
 
   def do_chat(message, model, state, conversation_id) do
+    IO.inspect(message, label: "in do_chat message")
     conversation = state.conversations[conversation_id]
     context = [conversation.context | state.system_messages] |> List.flatten()
-    user_message = %{role: "user", content: message}
+    user_message = %{role: "user", content: message.content}
 
-    msgs = [user_message | context]
+    msgs =
+      [user_message | context]
+      |> IO.inspect(label: "mooooooosgs")
 
     case chat_module().create_chat_completion(msgs |> Enum.reverse(), model) do
-      {:ok, response} ->
-        assistant_msg = unpack({:ok, response})
-
+      {:ok, %{choices: [%{message: assistant_msg}]} = response} ->
         new_conversation = %{
           conversation
           | context: [assistant_msg | [user_message | conversation.context]],
@@ -141,6 +155,12 @@ defmodule Capstone.Bots.BotServer do
         }
 
         {assistant_msg2, response2.usage, new_conversation}
+
+      {:error, %{"error" => %{"code" => nil, "type" => "server_error", "message" => message}}} ->
+        IO.inspect(message, label: "eeeeerror message")
+
+      response ->
+        IO.inspect(response, label: "dddddresponse")
     end
   end
 
