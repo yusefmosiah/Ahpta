@@ -17,7 +17,7 @@
 <div>
   <h2>Messages:</h2>
   <ul>
-    <%= for {_id, message}  <- @streams.messages do %>
+    <%= for message  <- @messages do %>
       <li>
         <strong><%= message.sender_id %>:</strong>
         <%= message.content %>

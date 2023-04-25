@@ -14,7 +14,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
     {:ok,
      socket
      |> assign(:conversation, conversation)
-     |> stream(:messages, messages)
+     |> assign(:messages, messages)
      |> assign(:current_user, user)}
   end
 
@@ -55,7 +55,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
     IO.inspect(message, label: "rrrrreceived message")
 
     IO.inspect(socket, label: "socket")
-    {:noreply, stream_insert(socket, :messages, message.payload)}
+    {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message.payload])}
   end
 
   defp page_title(:show), do: "Show Conversation"
