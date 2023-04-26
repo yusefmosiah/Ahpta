@@ -1,8 +1,18 @@
 defmodule CapstoneWeb.ConversationLive.Show do
   use CapstoneWeb, :live_view
+  use ExOpenAI.StreamingClient
 
   alias Capstone.Conversations
   alias Capstone.Bots.BotServer
+
+  defp dummy_message() do
+    %Capstone.Messages.Message{
+      content: "",
+      message_type: "dummy",
+      sender_id: Ecto.UUID.generate(),
+      conversation_id: Ecto.UUID.generate()
+    }
+  end
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
@@ -13,21 +23,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
     if connected?(socket) && user_token do
       user = Capstone.Accounts.get_user_by_session_token(user_token)
-      # bots = Capstone.Bots.get_bots_by_availability_and_ownership(user.id)
-
-      # pids =
-      #   Conversations.get_bots_in_conversation(id)
-      #   |> IO.inspect(label: "boooooot ids")
-      #   |> Enum.map(fn bot_id ->
-      #     IO.inspect(bot_id, label: "bbbbot id")
-      #     {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server(bot_id)
-      #     pid
-      #   end)
-
-      IO.inspect(self(), label: "seeeeeeelf pid")
-
-      # pids
-      # |> Enum.each(fn pid -> Capstone.Bots.BotServer.join_conversation(pid, conversation) end)
 
       {
         :ok,
@@ -35,6 +30,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:conversation, conversation)
         |> assign(:messages, conversation.messages)
         |> assign(:current_user, user)
+        |> assign(:streaming_message, dummy_message())
         #  |> assign(:bot_server_pids, pids)
         #  |> assign(
         #    :available_bots,
@@ -42,11 +38,13 @@ defmodule CapstoneWeb.ConversationLive.Show do
         #  )
       }
     else
-      {:ok,
-       socket
-       |> assign(:conversation, conversation)
-       |> assign(:messages, conversation.messages)
-      #  |> assign(:available_bots, [])
+      {
+        :ok,
+        socket
+        |> assign(:conversation, conversation)
+        |> assign(:messages, conversation.messages)
+        |> assign(:streaming_message, dummy_message())
+        #  |> assign(:available_bots, [])
       }
     end
   end
@@ -73,15 +71,12 @@ defmodule CapstoneWeb.ConversationLive.Show do
       {:ok, message} ->
         IO.inspect(message, label: "mmmmmessage")
 
-        # socket.assigns.bot_server_pids
-        # |> Enum.each(fn pid ->
-        #   BotServer.chat(
-        #     pid,
-        #     message_params["content"],
-        #     socket.assigns.conversation.id,
-        #     socket.assigns.current_user.id
-        #   )
-        # end)
+        messages = [%{role: "user", content: message.content}]
+
+        ExOpenAI.Chat.create_chat_completion(messages, "gpt-3.5-turbo",
+          stream: true,
+          stream_to: self()
+        )
 
         CapstoneWeb.Endpoint.broadcast_from(
           self(),
@@ -135,20 +130,86 @@ defmodule CapstoneWeb.ConversationLive.Show do
     {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message.payload])}
   end
 
-  # @impl true
-  # def handle_info(%{"bot_message" => payload} = message, socket) do
-  #   IO.inspect(message, label: "xxxxx message")
+  @impl true
+  def handle_data(data, socket) do
+    with %ExOpenAI.Components.CreateChatCompletionResponse{
+           choices: [%{delta: %{content: content}}]
+         } <- data do
+      IO.puts("got data: #{inspect(data)}")
 
-  #   {:ok, new_message} =
-  #     Capstone.Messages.create_message(%{
-  #       "conversation_id" => socket.assigns.conversation.id,
-  #       "sender_id" => socket.assigns.current_user.id,
-  #       "content" => payload.content,
-  #       "message_type" => "bot"
-  #     })
+      message = %Capstone.Messages.Message{
+        conversation_id: socket.assigns.conversation.id,
+        sender_id: socket.assigns.current_user.id,
+        content: content,
+        message_type: "bot"
+      }
 
-  #   {:noreply, assign(socket, :messages, socket.assigns.messages ++ [new_message])}
-  # end
+      IO.inspect(message, lable: "mmmmmessage created")
+
+      CapstoneWeb.Endpoint.broadcast(
+        "convo:#{socket.assigns.conversation.id}",
+        "streaming_message",
+        content
+      )
+
+      {:noreply, socket}
+    else
+      _ ->
+        IO.puts("got data: #{inspect(data)}")
+        {:noreply, socket}
+    end
+  end
+
+  def handle_info(%{event: "streaming_message", payload: payload}, socket) do
+    IO.inspect(payload, label: "ppppayload")
+
+    streaming_message =
+      socket.assigns.streaming_message
+      |> Map.put(:content, socket.assigns.streaming_message.content <> payload)
+      |> IO.inspect(label: "sssstreaming_message")
+
+    IO.inspect(socket.assigns.messages |> List.last(), label: "lllllast message")
+    {:noreply, socket |> assign(:streaming_message, streaming_message)}
+  end
+
+  @impl true
+  # callback on error
+  def handle_error(e, socket) do
+    IO.puts("got error: #{inspect(e)}")
+    {:noreply, socket}
+  end
+
+  @impl true
+  # callback on finish
+  def handle_finish(socket) do
+    attrs = %{
+      "conversation_id" => socket.assigns.conversation.id,
+      "sender_id" => socket.assigns.current_user.id,
+      "content" => socket.assigns.streaming_message.content,
+      "message_type" => "bot"
+    }
+
+    # fixme: error handling
+    {:ok, message} = Capstone.Messages.create_message(attrs)
+
+    CapstoneWeb.Endpoint.broadcast(
+      "convo:#{socket.assigns.conversation.id}",
+      "finished_streaming",
+      message
+    )
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%{event: "finished_streaming"} = message, socket) do
+    IO.inspect(message, label: "rrrrreceived message")
+
+    {:noreply,
+     assign(socket,
+       streaming_message: dummy_message(),
+       messages: socket.assigns.messages ++ [message.payload]
+     )}
+  end
 
   defp page_title(:show), do: "Show Conversation"
   defp page_title(:edit), do: "Edit Conversation"
