@@ -13,39 +13,41 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
     if connected?(socket) && user_token do
       user = Capstone.Accounts.get_user_by_session_token(user_token)
-      bots = Capstone.Bots.get_bots_by_availability_and_ownership(user.id)
+      # bots = Capstone.Bots.get_bots_by_availability_and_ownership(user.id)
 
-      pids =
-        Conversations.get_bots_in_conversation(id)
-        |> IO.inspect(label: "boooooot ids")
-        |> Enum.map(fn bot_id ->
-          IO.inspect(bot_id, label: "bbbbot id")
-          {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server(bot_id)
-          pid
-        end)
+      # pids =
+      #   Conversations.get_bots_in_conversation(id)
+      #   |> IO.inspect(label: "boooooot ids")
+      #   |> Enum.map(fn bot_id ->
+      #     IO.inspect(bot_id, label: "bbbbot id")
+      #     {:ok, pid} = Capstone.Bots.BotServerSupervisor.start_bot_server(bot_id)
+      #     pid
+      #   end)
 
-      IO.inspect(pids, label: "bot ppppids")
       IO.inspect(self(), label: "seeeeeeelf pid")
 
-      pids
-      |> Enum.each(fn pid -> Capstone.Bots.BotServer.join_conversation(pid, conversation) end)
+      # pids
+      # |> Enum.each(fn pid -> Capstone.Bots.BotServer.join_conversation(pid, conversation) end)
 
-      {:ok,
-       socket
-       |> assign(:conversation, conversation)
-       |> assign(:messages, conversation.messages)
-       |> assign(:current_user, user)
-       |> assign(:bot_server_pids, pids)
-       |> assign(
-         :available_bots,
-         bots.availables_owned_by_user ++ bots.availables_not_owned_by_user
-       )}
+      {
+        :ok,
+        socket
+        |> assign(:conversation, conversation)
+        |> assign(:messages, conversation.messages)
+        |> assign(:current_user, user)
+        #  |> assign(:bot_server_pids, pids)
+        #  |> assign(
+        #    :available_bots,
+        #    bots.availables_owned_by_user ++ bots.availables_not_owned_by_user
+        #  )
+      }
     else
       {:ok,
        socket
        |> assign(:conversation, conversation)
        |> assign(:messages, conversation.messages)
-       |> assign(:available_bots, [])}
+      #  |> assign(:available_bots, [])
+      }
     end
   end
 
@@ -71,16 +73,15 @@ defmodule CapstoneWeb.ConversationLive.Show do
       {:ok, message} ->
         IO.inspect(message, label: "mmmmmessage")
 
-        socket.assigns.bot_server_pids
-        |> IO.inspect(label: "sssssocket.assigns.bot_server_pids")
-        |> Enum.each(fn pid ->
-          BotServer.chat(
-            pid,
-            message_params["content"],
-            socket.assigns.conversation.id,
-            socket.assigns.current_user.id
-          )
-        end)
+        # socket.assigns.bot_server_pids
+        # |> Enum.each(fn pid ->
+        #   BotServer.chat(
+        #     pid,
+        #     message_params["content"],
+        #     socket.assigns.conversation.id,
+        #     socket.assigns.current_user.id
+        #   )
+        # end)
 
         CapstoneWeb.Endpoint.broadcast_from(
           self(),
@@ -134,20 +135,20 @@ defmodule CapstoneWeb.ConversationLive.Show do
     {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message.payload])}
   end
 
-  @impl true
-  def handle_info(%{"bot_message" => payload} = message, socket) do
-    IO.inspect(message, label: "xxxxx message")
+  # @impl true
+  # def handle_info(%{"bot_message" => payload} = message, socket) do
+  #   IO.inspect(message, label: "xxxxx message")
 
-    {:ok, new_message} =
-      Capstone.Messages.create_message(%{
-        "conversation_id" => socket.assigns.conversation.id,
-        "sender_id" => socket.assigns.current_user.id,
-        "content" => payload.content,
-        "message_type" => "bot"
-      })
+  #   {:ok, new_message} =
+  #     Capstone.Messages.create_message(%{
+  #       "conversation_id" => socket.assigns.conversation.id,
+  #       "sender_id" => socket.assigns.current_user.id,
+  #       "content" => payload.content,
+  #       "message_type" => "bot"
+  #     })
 
-    {:noreply, assign(socket, :messages, socket.assigns.messages ++ [new_message])}
-  end
+  #   {:noreply, assign(socket, :messages, socket.assigns.messages ++ [new_message])}
+  # end
 
   defp page_title(:show), do: "Show Conversation"
   defp page_title(:edit), do: "Edit Conversation"
