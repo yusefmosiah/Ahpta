@@ -1,7 +1,6 @@
 defmodule Capstone.Bots.BotServer do
   use GenServer
   alias Phoenix.PubSub
-  alias Capstone.Conversations
 
   ############################## PUBLIC API ##############################
 
@@ -54,8 +53,7 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_call({:join_conversation, conversation}, _from, state) do
-    # {_conversation, messages} = Conversations.get_conversation_and_messages(conversation_id)
-    # PubSub.subscribe(Capstone.PubSub, "convo:#{conversation.id}")
+    # fixme: 
 
     conversation_state = %{
       context: [],
@@ -107,10 +105,15 @@ defmodule Capstone.Bots.BotServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{event: "new_message", payload: payload} = message, state) do
+  @doc """
+  i think i need to handle this and do nothing
+  """
+  @impl true
+  def handle_info(%{event: "new_message"}, state) do
     {:noreply, state}
   end
 
+  @impl true
   def handle_info(%{"bot_message" => message}, state) do
     IO.inspect(message, label: "bbbbbot_message")
     {:noreply, state}
@@ -138,6 +141,9 @@ defmodule Capstone.Bots.BotServer do
 
         {assistant_msg, response.usage, new_conversation}
 
+      {:error, %{"error" => %{"code" => nil, "type" => "server_error", "message" => message}}} ->
+        IO.inspect(message, label: "eeeeerror message")
+
       {:error, _error} ->
         {:ok, response} = checkpoint(conversation.context)
         checkpoint = unpack({:ok, response})
@@ -156,9 +162,6 @@ defmodule Capstone.Bots.BotServer do
         }
 
         {assistant_msg2, response2.usage, new_conversation}
-
-      {:error, %{"error" => %{"code" => nil, "type" => "server_error", "message" => message}}} ->
-        IO.inspect(message, label: "eeeeerror message")
 
       response ->
         IO.inspect(response, label: "dddddresponse")

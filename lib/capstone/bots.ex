@@ -7,7 +7,6 @@ defmodule Capstone.Bots do
   alias Capstone.Repo
 
   alias Capstone.Bots.Bot
-  alias Capstone.Bots.BotServerSupervisor
 
   @doc """
   Returns the list of bots.

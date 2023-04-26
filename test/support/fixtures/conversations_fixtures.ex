@@ -27,7 +27,9 @@ defmodule Capstone.ConversationsFixtures do
       attrs
       |> Enum.into(%{
         owner_permission: true,
-        participant_type: "some participant_type"
+        participant_type: "some participant_type",
+        conversation_id: attrs.conversation_id
+        # fixme get conversation_id from conversation_fixture
       })
       |> Capstone.Conversations.create_conversation_participant()
 

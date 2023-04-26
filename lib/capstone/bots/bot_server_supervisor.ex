@@ -14,7 +14,7 @@ defmodule Capstone.Bots.BotServerSupervisor do
     key = bot_id
 
     case Registry.lookup(Capstone.BotRegistry, key) do
-      [{pid, _key}] ->
+      [{pid, _value}] ->
         {:ok, pid}
 
       [] ->
