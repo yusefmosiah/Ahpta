@@ -31,7 +31,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:conversation, conversation)
         |> assign(:messages, conversation.messages)
         |> assign(:current_user, user)
-        |> assign(:streaming_message, dummy_message())
         |> assign(:ongoing_messages, %{})
       }
     else
@@ -40,7 +39,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
         socket
         |> assign(:conversation, conversation)
         |> assign(:messages, conversation.messages)
-        |> assign(:streaming_message, dummy_message())
         |> assign(:ongoing_messages, %{})
       }
     end
