@@ -23,7 +23,6 @@ defmodule Capstone.Bots.BotServerSupervisor do
           {:ok, pid}
         end
     end
-    |> IO.inspect(label: "llllookup start_bot_server")
   end
 
   def start_bot_server_child(args) do

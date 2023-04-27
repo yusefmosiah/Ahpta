@@ -11,7 +11,7 @@ defmodule CapstoneWeb.BotLiveTest do
   defp create_bot(_) do
     bot = bot_fixture()
 
-    ##fixme now that bot_server_pid removed
+    ## fixme now that bot_server_pid removed
     # on_exit(fn ->
     #   Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
     # end)

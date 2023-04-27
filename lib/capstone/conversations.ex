@@ -173,8 +173,6 @@ defmodule Capstone.Conversations do
 
   """
   def create_conversation_participant(attrs \\ %{}) do
-    IO.inspect(attrs, label: "ccccpppp attrs")
-
     %ConversationParticipant{}
     |> ConversationParticipant.changeset(attrs)
     |> Repo.insert()

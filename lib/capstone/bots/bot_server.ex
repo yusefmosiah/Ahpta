@@ -1,4 +1,5 @@
 defmodule Capstone.Bots.BotServer do
+  require Logger
   use GenServer
   alias Phoenix.PubSub
 
@@ -53,7 +54,7 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_call({:join_conversation, conversation}, _from, state) do
-    # fixme: 
+    # fixme:
 
     conversation_state = %{
       context: [],
@@ -85,7 +86,6 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_cast({:chat, message, conversation_id, sender_id, model}, state) do
-    IO.inspect(message, label: "mmmmmmessage")
     {bot_message_raw, _usage, new_conversation} = do_chat(message, model, state, conversation_id)
 
     new_state = put_in(state.conversations[conversation_id], new_conversation)
@@ -115,15 +115,12 @@ defmodule Capstone.Bots.BotServer do
 
   @impl true
   def handle_info(%{"bot_message" => message}, state) do
-    IO.inspect(message, label: "bbbbbot_message")
     {:noreply, state}
   end
 
   ############################## PRIVATE FUNCTIONS ##############################
 
   def do_chat(message, model, state, conversation_id) do
-    IO.inspect(conversation_id, label: "ccccconversation_id")
-    IO.inspect(state, label: "ssssstate")
     conversation = state.conversations[conversation_id]
     context = [conversation.context | state.system_messages] |> List.flatten()
     user_message = %{role: "user", content: message}
@@ -142,7 +139,7 @@ defmodule Capstone.Bots.BotServer do
         {assistant_msg, response.usage, new_conversation}
 
       {:error, %{"error" => %{"code" => nil, "type" => "server_error", "message" => message}}} ->
-        IO.inspect(message, label: "eeeeerror message")
+        Logger.error("Server error: #{inspect(message)}")
 
       {:error, _error} ->
         {:ok, response} = checkpoint(conversation.context)
@@ -164,7 +161,7 @@ defmodule Capstone.Bots.BotServer do
         {assistant_msg2, response2.usage, new_conversation}
 
       response ->
-        IO.inspect(response, label: "dddddresponse")
+        Logger.info("response: #{inspect(response)}")
     end
   end
 
@@ -192,3 +189,31 @@ defmodule Capstone.Bots.BotServer do
     Application.get_env(:capstone, :chat_module)
   end
 end
+
+# from show.ex
+# @impl true
+# def handle_event("add_bot", %{"bot_id" => bot_id}, socket) do
+#   Conversations.get_bots_in_conversation(socket.assigns.conversation.id)
+
+#   attrs =
+#     %{
+#       "conversation_id" => socket.assigns.conversation.id,
+#       "participant_id" => nil,
+#       "bot_id" => bot_id,
+#       "participant_type" => "bot",
+#       "owner_permission" => "true"
+#     }
+
+#   case Capstone.Conversations.create_conversation_participant(attrs) do
+#     {:ok, conversation_participant} ->
+
+#       Conversations.get_bots_in_conversation(socket.assigns.conversation.id)
+
+#       {:noreply, socket}
+
+#     {:error, reason} ->
+#       Logger.error("Error creating conversation participant: #{inspect(reason)}"
+#       {:noreply, socket}
+
+#   end
+# end

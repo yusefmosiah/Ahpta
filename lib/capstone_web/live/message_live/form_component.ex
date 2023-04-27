@@ -76,8 +76,6 @@ defmodule CapstoneWeb.MessageLive.FormComponent do
   end
 
   defp save_message(socket, :new, message_params) do
-    IO.inspect(message_params, label: "mmmmmessage_params")
-
     case Messages.create_message(message_params) do
       {:ok, message} ->
         CapstoneWeb.Endpoint.broadcast("messages", "new_message", message)
