@@ -18,7 +18,7 @@
 
       <div>
         <h2 class="text-xl font-semibold mb-2 text-white">Messages:</h2>
-        <ul id="message-list" phx-update="append" class="space-y-4">
+        <ul id="message-list" phx-update="replace" class="space-y-4">
           <%= for message <- @messages do %>
             <li id={message.id} class="bg-backdrop bg-opacity-60 bg-blur rounded-xl p-4 md:p-6 shadow-glass">
               <strong class="text-lg md:text-xl font-bold text-black"><%= message.sender_id %>:</strong>
