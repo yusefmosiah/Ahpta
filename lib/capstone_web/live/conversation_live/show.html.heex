@@ -28,7 +28,7 @@
 
 <div>
   <h2>Messages:</h2>
-  <ul id="message-list" phx-update="append">
+  <ul id="message-list" phx-update="replace">
     <%= for message <- @messages do %>
       <li id={message.id}>
         <strong><%= message.sender_id %>:</strong>
