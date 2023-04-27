@@ -28,15 +28,15 @@
 
 <div>
   <h2>Messages:</h2>
-  <ul>
+  <ul id="message-list" phx-update="append">
     <%= for message <- @messages do %>
-      <li>
+      <li id={message.id}>
         <strong><%= message.sender_id %>:</strong>
         <%= message.content %>
       </li>
     <% end %>
     <%= for {id, content} <- @ongoing_messages do %>
-      <li>
+      <li id={id}>
         <strong><%= id %>:</strong>
         <%= content %>
       </li>

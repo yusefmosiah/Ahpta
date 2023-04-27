@@ -97,8 +97,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
       ongoing_messages =
         Map.update(socket.assigns.ongoing_messages, id, content, &(&1 <> content))
 
-      {:noreply, socket |> assign(:ongoing_messages, ongoing_messages)}
-
       CapstoneWeb.Endpoint.broadcast_from(
         self(),
         "convo:#{socket.assigns.conversation.id}",
