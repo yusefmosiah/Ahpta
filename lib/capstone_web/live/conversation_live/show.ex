@@ -108,8 +108,32 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
       {:noreply, assign(socket, :ongoing_messages, ongoing_messages)}
     else
+      %ExOpenAI.Components.CreateChatCompletionResponse{
+        choices: [%{delta: %{}, finish_reason: "stop"}],
+        id: id
+      } ->
+        content = Map.get(socket.assigns.ongoing_messages, id)
+        Logger.info("ccccontent: #{inspect(content)}")
+
+        attrs = %{
+          "conversation_id" => socket.assigns.conversation.id,
+          "sender_id" => socket.assigns.current_user.id,
+          "content" => content,
+          "message_type" => "bot"
+        }
+
+        {:ok, bot_message} = Capstone.Messages.create_message(attrs)
+
+        CapstoneWeb.Endpoint.broadcast(
+          "convo:#{socket.assigns.conversation.id}",
+          "finished_streaming",
+          %{bot_message: bot_message, id: id}
+        )
+
+        {:noreply, socket}
+
       _ ->
-        Logger.info("got data: #{inspect(data)}")
+        Logger.info("weird got data: #{inspect(data)}")
         {:noreply, socket}
     end
   end
@@ -136,11 +160,12 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   @impl true
   def handle_info(%{event: "finished_streaming"} = message, socket) do
+    ongoing_messages = Map.delete(socket.assigns.ongoing_messages, message.payload.id)
+
     {:noreply,
-     assign(socket,
-       streaming_message: dummy_message(),
-       messages: socket.assigns.messages ++ [message.payload]
-     )}
+     socket
+     |> assign(:ongoing_messages, ongoing_messages)
+     |> assign(:messages, socket.assigns.messages ++ [message.payload.bot_message])}
   end
 
   @impl true
@@ -153,22 +178,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
   @impl true
   # callback on finish
   def handle_finish(socket) do
-    attrs = %{
-      "conversation_id" => socket.assigns.conversation.id,
-      "sender_id" => socket.assigns.current_user.id,
-      "content" => socket.assigns.streaming_message.content,
-      "message_type" => "bot"
-    }
-
-    # fixme: error handling
-    {:ok, message} = Capstone.Messages.create_message(attrs)
-
-    CapstoneWeb.Endpoint.broadcast(
-      "convo:#{socket.assigns.conversation.id}",
-      "finished_streaming",
-      message
-    )
-
     {:noreply, socket}
   end
 
