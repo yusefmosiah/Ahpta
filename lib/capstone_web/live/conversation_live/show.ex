@@ -32,6 +32,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:messages, conversation.messages)
         |> assign(:current_user, user)
         |> assign(:streaming_message, dummy_message())
+        |> assign(:ongoing_messages, %{})
       }
     else
       {
@@ -40,6 +41,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:conversation, conversation)
         |> assign(:messages, conversation.messages)
         |> assign(:streaming_message, dummy_message())
+        |> assign(:ongoing_messages, %{})
       }
     end
   end
@@ -87,24 +89,24 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_data(data, socket) do
     # refactor to case
     with %ExOpenAI.Components.CreateChatCompletionResponse{
-           choices: [%{delta: %{content: content}}]
+           choices: [%{delta: %{content: content}}],
+           id: id
          } <- data do
       Logger.info("got data: #{inspect(data)}")
 
-      message = %Capstone.Messages.Message{
-        conversation_id: socket.assigns.conversation.id,
-        sender_id: socket.assigns.current_user.id,
-        content: content,
-        message_type: "bot"
-      }
+      ongoing_messages =
+        Map.update(socket.assigns.ongoing_messages, id, content, &(&1 <> content))
 
-      CapstoneWeb.Endpoint.broadcast(
+      {:noreply, socket |> assign(:ongoing_messages, ongoing_messages)}
+
+      CapstoneWeb.Endpoint.broadcast_from(
+        self(),
         "convo:#{socket.assigns.conversation.id}",
         "streaming_message",
-        content
+        %{id: id, content: content}
       )
 
-      {:noreply, socket}
+      {:noreply, assign(socket, :ongoing_messages, ongoing_messages)}
     else
       _ ->
         Logger.info("got data: #{inspect(data)}")
@@ -119,11 +121,17 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   @impl true
   def handle_info(%{event: "streaming_message", payload: payload}, socket) do
-    streaming_message =
-      socket.assigns.streaming_message
-      |> Map.put(:content, socket.assigns.streaming_message.content <> payload)
+    Logger.info("got streaming message: #{inspect(payload)}")
 
-    {:noreply, socket |> assign(:streaming_message, streaming_message)}
+    ongoing_messages =
+      Map.update(
+        socket.assigns.ongoing_messages,
+        payload.id,
+        payload.content,
+        &(&1 <> payload.content)
+      )
+
+    {:noreply, socket |> assign(:ongoing_messages, ongoing_messages)}
   end
 
   @impl true

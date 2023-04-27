@@ -29,6 +29,25 @@
 <div>
   <h2>Messages:</h2>
   <ul>
+    <%= for message <- @messages do %>
+      <li>
+        <strong><%= message.sender_id %>:</strong>
+        <%= message.content %>
+      </li>
+    <% end %>
+    <%= for {id, content} <- @ongoing_messages do %>
+      <li>
+        <strong><%= id %>:</strong>
+        <%= content %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+
+<%!-- <div>
+  <h2>Messages:</h2>
+  <ul>
     <%= for message <- @messages ++ [@streaming_message] do %>
       <li>
         <%= if message.content != "" do %>
@@ -38,7 +57,8 @@
       </li>
     <% end %>
   </ul>
-</div>
+</div> --%>
+
 <div>
   <h2>New Message:</h2>
   <form phx-submit="new_message">
