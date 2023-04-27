@@ -13,9 +13,19 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        brand: "#FD4F00",
-      }
+      backgroundColor: {
+        'backdrop': 'rgba(255, 255, 255, 0.8)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(ellipse at center, var(--tw-gradient-stops))',
+      },
+      boxShadow: {
+        'glass': '0 4px 6px rgba(0, 0, 0, 0.1)',
+      },
+      gradientColorStops: {
+        'primary-start': '#93C5FD',
+        'primary-end': '#A78BFA',
+      },
     },
   },
   plugins: [

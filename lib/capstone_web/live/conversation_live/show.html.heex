@@ -1,95 +1,101 @@
-<.header>
-  Conversation <%= @conversation.id %>
-  <:subtitle>This is a conversation record from your database.</:subtitle>
-  <:actions>
-    <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()}>
-      <.button>Edit conversation</.button>
-    </.link>
-  </:actions>
-</.header>
+<div class="container mx-auto px-4 py-8">
+  <header class="mb-6">
+    <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+      Conversation <%= @conversation.id %>
+    </h1>
+    <p class="text-gray-600 dark:text-gray-400">
+      This is a conversation record from your database.
+    </p>
+    <div class="mt-4">
+      <a href="#" class="underline text-blue-600 dark:text-blue-400" phx-click={JS.push_focus()} phx-patch={~p"/conversations/#{@conversation}/show/edit"}>
+        Edit conversation
+      </a>
+    </div>
+  </header>
 
-<.list>
-  <:item title="Topic"><%= @conversation.topic %></:item>
-  <:item title="Is published"><%= @conversation.is_published %></:item>
-</.list>
-
-<%!-- <div>
-  <h2>Add a Bot to the Conversation:</h2>
-  <form phx-submit="add_bot">
-    <label for="bot_id">Select a Bot:</label>
-    <select name="bot_id" id="bot_id">
-      <%= for bot <- @available_bots do %>
-        <option value={bot.id}><%= bot.name %></option>
-      <% end %>
-    </select>
-    <button type="submit">Add Bot</button>
-  </form>
-</div> --%>
-
-<div>
-  <h2>Messages:</h2>
-  <ul id="message-list" phx-update="replace">
-    <%= for message <- @messages do %>
-      <li id={message.id}>
-        <strong><%= message.sender_id %>:</strong>
-        <%= message.content %>
-      </li>
-    <% end %>
-    <%= for {id, content} <- @ongoing_messages do %>
-      <li id={id}>
-        <strong><%= id %>:</strong>
-        <%= content %>
-      </li>
-    <% end %>
-  </ul>
-</div>
-
-
-<%!-- <div>
-  <h2>Messages:</h2>
-  <ul>
-    <%= for message <- @messages ++ [@streaming_message] do %>
-      <li>
-        <%= if message.content != "" do %>
-          <strong><%= message.sender_id %>:</strong>
-          <%= message.content %>
+  <section class="grid grid-cols-2 gap-4 mb-6">
+    <div class="col-span-1">
+      <p class="text-gray-800 dark:text-gray-100 font-semibold">Topic</p>
+      <p class="text-gray-600 dark:text-gray-400"><%= @conversation.topic %></p>
+    </div>
+    <div class="col-span-1">
+      <p class="text-gray-800 dark:text-gray-100 font-semibold">Is published</p>
+      <p class="text-gray-600 dark:text-gray-400"><%= @conversation.is_published %></p>
+    </div>
+  </section>
+<%!--
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Add a Bot to the Conversation:</h2>
+    <form phx-submit="add_bot" class="flex items-end">
+      <label for="bot_id" class="mr-2 text-gray-800 dark:text-gray-100">Select a Bot:</label>
+      <select name="bot_id" id="bot_id" class="mr-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500 text-base">
+        <%= for bot <- @available_bots do %>
+          <option value={bot.id}><%= bot.name %></option>
         <% end %>
-      </li>
-    <% end %>
-  </ul>
-</div> --%>
+      </select>
+      <button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-400 text-white rounded shadow">Add Bot</button>
+    </form>
+  </div> --%>
 
-<div>
-  <h2>New Message:</h2>
-  <form phx-submit="new_message">
-    <label for="content">Content:</label>
-    <input type="text" id="content" name="message[content]" required />
-    <input
-      type="hidden"
-      type="text"
-      id="message_type"
-      name="message[message_type]"
-      value="human"
-      required
-    />
-    <button type="submit">Send</button>
-  </form>
+  <div class="min-h-screen bg-gradient-to-br from-primary-start to-primary-end">
+  <div class="bg-gradient-to-br from-primary-start to-primary-end bg-gradient-radial relative w-full min-h-screen">
+    <div class="container mx-auto p-4 md:p-8">
+      <h2 class="text-2xl md:text-4xl font-bold text-white mb-4">Messages:</h2>
+      <ul id="message-list" phx-update="replace" class="space-y-4">
+        <%= for message <- @messages do %>
+          <li id={message.id} class="bg-backdrop bg-opacity-60 bg-blur rounded-xl p-4 md:p-6 shadow-glass">
+            <strong class="text-lg md:text-xl font-bold text-black"><%= message.sender_id %>:</strong>
+            <p class="text-black text-opacity-90 text-base md:text-lg"><%= message.content %></p>
+          </li>
+        <% end %>
+        <%= for {id, content} <- @ongoing_messages do %>
+          <li id={id} class="bg-backdrop bg-opacity-60 bg-blur rounded-xl p-4 md:p-6 shadow-glass">
+            <strong class="text-lg md:text-xl font-bold text-black"><%= id %>:</strong>
+            <p class="text-black text-opacity-90 text-base md:text-lg"><%= content %></p>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
 </div>
 
-<.back navigate={~p"/conversations"}>Back to conversations</.back>
-
-<.modal
-  :if={@live_action == :edit}
-  id="conversation-modal"
-  show
-  on_cancel={JS.patch(~p"/conversations/#{@conversation}")}
->
-  <.live_component
-    module={CapstoneWeb.ConversationLive.FormComponent}
-    id={@conversation.id}
-    title={@page_title}
-    action={@live_action}
-    conversation={@conversation}
-    patch={~p"/conversations/#{@conversation}"}
-  />
-</.modal>
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">New Message:</h2>
+    <form phx-submit="new_message" class="flex items-end">
+      <label for="content" class="mr-2 text-gray-800 dark:text-gray-100">Content:</label>
+      <input type="text" id="content" name="message[content]" required class="mr-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500 text-base flex-grow" />
+      <input
+        type="hidden"
+        type="text"
+        id="message_type"
+        name="message[message_type]"
+        value="human"
+        required
+      />
+      <button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-400 text-white rounded shadow">Send</button>
+    </form>
+  </div>
+  <div class="mb-6">
+    <a href="#" class="underline text-blue-600 dark:text-blue-400" phx-navigate={~p"/conversations"}>
+      Back to conversations
+    </a>
+  </div>
+  <div
+    :if={@live_action == :edit}
+    id="conversation-modal"
+    show
+    class="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50"
+    on_cancel={JS.patch(~p"/conversations/#{@conversation}")}
+  >
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg">
+      <.live_component
+        module={CapstoneWeb.ConversationLive.FormComponent}
+        id={@conversation.id}
+        title={@page_title}
+        action={@live_action}
+        conversation={@conversation}
+        patch={~p"/conversations/#{@conversation}"}
+      />
+    </div>
+  </div>
+</div>
