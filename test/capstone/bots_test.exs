@@ -1,14 +1,14 @@
 defmodule Capstone.BotsTest do
   use Capstone.DataCase
   import Capstone.BotsFixtures
+  import Capstone.ConversationsFixtures
   alias Capstone.Bots
+  alias Capstone.Conversations
 
   setup do
     bot = bot_fixture()
-
-    
-
-    {:ok, bot: bot}
+    conversation = conversation_fixture()
+    {:ok, bot: bot, conversation: conversation}
   end
 
   describe "bots" do
@@ -30,18 +30,11 @@ defmodule Capstone.BotsTest do
       assert {:ok, %Bot{} = bot} = Bots.create_bot(valid_attrs)
       assert bot.is_available_for_rent == true
       assert bot.name == "different name"
-
-      #       fixme now that bot_server_pid removed
-      # Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
     end
 
-    ######## This test fails with the following error:
-    #     ** (MatchError) no match of right hand side value: {:error, {:already_started, #PID<0.1522.0>}}
-    # code: assert {:error, %Ecto.Changeset{}} = Bots.create_bot(@invalid_attrs)
-
-    # test "create_bot/1 with invalid data returns error changeset" do
-    #   assert {:error, %Ecto.Changeset{}} = Bots.create_bot(@invalid_attrs)
-    # end
+    test "create_bot/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Bots.create_bot(@invalid_attrs)
+    end
 
     test "update_bot/2 with valid data updates the bot", %{bot: bot} do
       update_attrs = %{is_available_for_rent: false, name: "some updated name"}
@@ -63,6 +56,64 @@ defmodule Capstone.BotsTest do
 
     test "change_bot/1 returns a bot changeset", %{bot: bot} do
       assert %Ecto.Changeset{} = Bots.change_bot(bot)
+    end
+  end
+
+  describe "bots subscribing to conversations" do
+    alias Capstone.Bots.Bot
+    alias Capstone.Conversations.ConversationParticipant
+
+    test "subscribe_to_conversation/2 with valid data subscribes the bot to the conversation",
+         %{bot: bot, conversation: conversation} do
+      assert {:ok, %ConversationParticipant{} = cp} =
+               Bots.subscribe_to_conversation(bot, conversation)
+
+      assert cp.bot_id == bot.id
+      assert cp.conversation_id == conversation.id
+    end
+
+    test "subscribe_to_conversation/2 with an already subscribed bot returns error", %{
+      bot: bot,
+      conversation: conversation
+    } do
+      assert {:ok, %ConversationParticipant{} = _cp} =
+               Bots.subscribe_to_conversation(bot, conversation)
+
+      assert {:error, :already_subscribed} = Bots.subscribe_to_conversation(bot, conversation)
+    end
+
+    test "unsubscribe_from_conversation/2 unsubscribes the bot from the conversation", %{
+      bot: bot,
+      conversation: conversation
+    } do
+      assert {:ok, %ConversationParticipant{} = cp} =
+               Bots.subscribe_to_conversation(bot, conversation)
+
+      assert {:ok, %ConversationParticipant{}} =
+               Bots.unsubscribe_from_conversation(bot, conversation)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Conversations.get_conversation_participant!(cp.id)
+      end
+    end
+
+    test "unsubscribe_from_conversation/2 with a not subscribed bot returns error", %{
+      bot: bot,
+      conversation: conversation
+    } do
+      assert {:error, :not_subscribed} = Bots.unsubscribe_from_conversation(bot, conversation)
+    end
+
+    test "list_subscribed_conversations/1 returns all conversations the bot is subscribed to", %{
+      bot: bot,
+      conversation: conversation
+    } do
+      assert [] == Bots.list_subscribed_conversations(bot)
+
+      assert {:ok, %ConversationParticipant{} = _cp} =
+               Bots.subscribe_to_conversation(bot, conversation)
+
+      assert [conversation] == Bots.list_subscribed_conversations(bot)
     end
   end
 end

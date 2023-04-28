@@ -7,6 +7,9 @@ defmodule Capstone.Bots do
   alias Capstone.Repo
 
   alias Capstone.Bots.Bot
+  alias Capstone.Conversations.Conversation
+  alias Capstone.Conversations.ConversationParticipant
+
 
   @doc """
   Returns the list of bots.
@@ -118,5 +121,46 @@ defmodule Capstone.Bots do
   """
   def change_bot(%Bot{} = bot, attrs \\ %{}) do
     Bot.changeset(bot, attrs)
+  end
+
+  ## by gpt-4
+  def subscribe_to_conversation(%Bot{} = bot, %Conversation{} = conversation) do
+    query = from(cp in ConversationParticipant,
+      where: cp.bot_id == ^bot.id and cp.conversation_id == ^conversation.id
+    )
+
+    case Repo.one(query) do
+      nil ->
+        %ConversationParticipant{}
+        |> ConversationParticipant.changeset(%{bot_id: bot.id, conversation_id: conversation.id, participant_type: "bot"})
+        |> Repo.insert()
+
+      _ ->
+        {:error, :already_subscribed}
+    end
+  end
+
+  def unsubscribe_from_conversation(%Bot{} = bot, %Conversation{} = conversation) do
+    query = from(cp in ConversationParticipant,
+      where: cp.bot_id == ^bot.id and cp.conversation_id == ^conversation.id
+    )
+
+    case Repo.one(query) do
+      nil ->
+        {:error, :not_subscribed}
+
+      cp ->
+        Repo.delete(cp)
+    end
+  end
+
+  def list_subscribed_conversations(%Bot{} = bot) do
+    query = from(cp in ConversationParticipant,
+      join: c in assoc(cp, :conversation),
+      where: cp.bot_id == ^bot.id,
+      select: c
+    )
+
+    Repo.all(query)
   end
 end
