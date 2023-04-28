@@ -4,7 +4,6 @@ defmodule CapstoneWeb.ConversationLiveTest do
   import Phoenix.LiveViewTest
   import Capstone.ConversationsFixtures
 
-
   @create_attrs %{is_published: true, topic: "some topic"}
   @update_attrs %{is_published: false, topic: "some updated topic"}
   @invalid_attrs %{is_published: false, topic: nil}

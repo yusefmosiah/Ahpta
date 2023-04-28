@@ -3,10 +3,17 @@ defmodule CapstoneWeb.BotLive.Index do
 
   alias Capstone.Bots
   alias Capstone.Bots.Bot
+  alias Capstone.Conversations
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :bots, Bots.list_bots())}
+    conversations = Conversations.list_conversations()
+
+    bots =
+      Bots.list_bots()
+      |> IO.inspect(label: "bbbbbots")
+
+    {:ok, stream(socket, :bots, bots) |> assign(:conversations, conversations)}
   end
 
   @impl true
@@ -43,5 +50,91 @@ defmodule CapstoneWeb.BotLive.Index do
     {:ok, _} = Bots.delete_bot(bot)
 
     {:noreply, stream_delete(socket, :bots, bot)}
+  end
+
+  @impl true
+  def handle_event(
+        "subscribe",
+        %{"bot_id" => bot_id, "conversation_id" => conversation_id},
+        socket
+      ) do
+    bot = Bots.get_bot!(bot_id)
+    conversation = Conversations.get_conversation!(conversation_id)
+
+    case Bots.subscribe_to_conversation(bot, conversation) do
+      {:ok, _} ->
+        {:noreply, socket}
+
+      {:error, :already_subscribed} ->
+        {:noreply, socket |> put_flash(:error, "Bot is already subscribed to this conversation.")}
+    end
+  end
+
+  @impl true
+  def handle_event(
+        "unsubscribe",
+        %{"bot_id" => bot_id, "conversation_id" => conversation_id},
+        socket
+      ) do
+    bot = Bots.get_bot!(bot_id)
+    conversation = Conversations.get_conversation!(conversation_id)
+
+    case Bots.unsubscribe_from_conversation(bot, conversation) do
+      {:ok, _} ->
+        {:noreply, socket}
+
+      {:error, :not_subscribed} ->
+        {:noreply, socket |> put_flash(:error, "Bot is not subscribed to this conversation.")}
+    end
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <.header>
+      Listing Bots
+      <:actions>
+        <.link patch={~p"/bots/new"}>
+          <.button>New Bot</.button>
+        </.link>
+      </:actions>
+    </.header>
+
+    <.table
+      id="bots"
+      rows={@streams.bots}
+      row_click={fn {_id, bot} -> JS.navigate(~p"/bots/#{bot}") end}
+    >
+      <:col :let={{_id, bot}} label="Name"><%= bot.name %></:col>
+      <:col :let={{_id, bot}} label="Is available for rent"><%= bot.is_available_for_rent %></:col>
+      <%!-- <:col :let={{_id, bot}} label="System Message"><%= bot.system_messages |> Enum.at(0, "") %></:col> <!-- Add this line --> --%>
+      <:action :let={{_id, bot}}>
+        <div class="sr-only">
+          <.link navigate={~p"/bots/#{bot}"}>Show</.link>
+        </div>
+        <.link patch={~p"/bots/#{bot}/edit"}>Edit</.link>
+      </:action>
+
+      <:action :let={{id, bot}}>
+        <.link
+          phx-click={JS.push("delete", value: %{id: bot.id}) |> hide("##{id}")}
+          data-confirm="Are you sure?"
+        >
+          Delete
+        </.link>
+      </:action>
+    </.table>
+
+    <.modal :if={@live_action in [:new, :edit]} id="bot-modal" show on_cancel={JS.patch(~p"/bots")}>
+      <.live_component
+        module={CapstoneWeb.BotLive.FormComponent}
+        id={@bot.id || :new}
+        title={@page_title}
+        action={@live_action}
+        bot={@bot}
+        patch={~p"/bots"}
+      />
+    </.modal>
+    """
   end
 end

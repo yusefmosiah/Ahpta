@@ -10,7 +10,6 @@ defmodule Capstone.Bots do
   alias Capstone.Conversations.Conversation
   alias Capstone.Conversations.ConversationParticipant
 
-
   @doc """
   Returns the list of bots.
 
@@ -125,14 +124,19 @@ defmodule Capstone.Bots do
 
   ## by gpt-4
   def subscribe_to_conversation(%Bot{} = bot, %Conversation{} = conversation) do
-    query = from(cp in ConversationParticipant,
-      where: cp.bot_id == ^bot.id and cp.conversation_id == ^conversation.id
-    )
+    query =
+      from(cp in ConversationParticipant,
+        where: cp.bot_id == ^bot.id and cp.conversation_id == ^conversation.id
+      )
 
     case Repo.one(query) do
       nil ->
         %ConversationParticipant{}
-        |> ConversationParticipant.changeset(%{bot_id: bot.id, conversation_id: conversation.id, participant_type: "bot"})
+        |> ConversationParticipant.changeset(%{
+          bot_id: bot.id,
+          conversation_id: conversation.id,
+          participant_type: "bot"
+        })
         |> Repo.insert()
 
       _ ->
@@ -141,9 +145,10 @@ defmodule Capstone.Bots do
   end
 
   def unsubscribe_from_conversation(%Bot{} = bot, %Conversation{} = conversation) do
-    query = from(cp in ConversationParticipant,
-      where: cp.bot_id == ^bot.id and cp.conversation_id == ^conversation.id
-    )
+    query =
+      from(cp in ConversationParticipant,
+        where: cp.bot_id == ^bot.id and cp.conversation_id == ^conversation.id
+      )
 
     case Repo.one(query) do
       nil ->
@@ -155,12 +160,25 @@ defmodule Capstone.Bots do
   end
 
   def list_subscribed_conversations(%Bot{} = bot) do
-    query = from(cp in ConversationParticipant,
-      join: c in assoc(cp, :conversation),
-      where: cp.bot_id == ^bot.id,
-      select: c
-    )
+    query =
+      from(cp in ConversationParticipant,
+        join: c in assoc(cp, :conversation),
+        where: cp.bot_id == ^bot.id,
+        select: c
+      )
 
     Repo.all(query)
   end
+
+  def list_subscribed_bots_for_conversation(%Conversation{} = conversation) do
+    query = from(cp in ConversationParticipant,
+      where: cp.conversation_id == ^conversation.id,
+      where: cp.participant_type == "bot",
+      preload: :bot
+    )
+
+    participants = Repo.all(query)
+    Enum.map(participants, & &1.bot)
+  end
+
 end

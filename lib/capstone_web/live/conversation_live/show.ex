@@ -10,6 +10,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def mount(%{"id" => id}, session, socket) do
     user_token = Map.get(session, "user_token")
     conversation = Conversations.get_conversation!(id)
+    subscribed_bots = Bots.list_subscribed_bots_for_conversation(conversation)
 
     if connected?(socket), do: CapstoneWeb.Endpoint.subscribe("convo:#{id}")
 
@@ -32,6 +33,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
           available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user
         )
         |> assign(:dropdown_visible, false)
+        |> assign(:subscribed_bots, subscribed_bots)
       }
     else
       {
@@ -42,6 +44,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:ongoing_messages, %{})
         |> assign(:available_bots, [])
         |> assign(:dropdown_visible, false)
+        |> assign(:subscribed_bots, subscribed_bots)
       }
     end
   end
@@ -66,7 +69,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
     case Bots.subscribe_to_conversation(bot, conversation) do
       {:ok, _} ->
-        {:noreply, socket}
+        {:noreply, assign(socket, :subscribed_bots, [bot | socket.assigns.subscribed_bots])}
 
       {:error, :already_subscribed} ->
         {:noreply, socket |> put_flash(:error, "Bot is already subscribed to this conversation")}

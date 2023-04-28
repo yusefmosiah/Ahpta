@@ -85,14 +85,22 @@ defmodule Capstone.ConversationsTest do
 
     test "get_conversation_participant!/1 returns the conversation_participant with given id" do
       conversation = conversation_fixture()
-      conversation_participant = conversation_participant_fixture(%{conversation_id: conversation.id})
+
+      conversation_participant =
+        conversation_participant_fixture(%{conversation_id: conversation.id})
+
       assert Conversations.get_conversation_participant!(conversation_participant.id) ==
                conversation_participant
     end
 
     test "create_conversation_participant/1 with valid data creates a conversation_participant" do
       conversation = conversation_fixture()
-      valid_attrs = %{owner_permission: true, participant_type: "some participant_type", conversation_id: conversation.id}
+
+      valid_attrs = %{
+        owner_permission: true,
+        participant_type: "some participant_type",
+        conversation_id: conversation.id
+      }
 
       assert {:ok, %ConversationParticipant{} = conversation_participant} =
                Conversations.create_conversation_participant(valid_attrs)

@@ -20,6 +20,7 @@ defmodule CapstoneWeb.BotLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
+        <.input field={@form[:system_message]} type="text" label="System Message" />
         <.input field={@form[:is_available_for_rent]} type="checkbox" label="Is available for rent" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Bot</.button>
