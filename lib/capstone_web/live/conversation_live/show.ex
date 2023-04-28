@@ -4,16 +4,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   use ExOpenAI.StreamingClient
 
   alias Capstone.Conversations
-  alias Capstone.Bots.BotServer
-
-  defp dummy_message() do
-    %Capstone.Messages.Message{
-      content: "",
-      message_type: "dummy",
-      sender_id: Ecto.UUID.generate(),
-      conversation_id: Ecto.UUID.generate()
-    }
-  end
+  alias Capstone.Bots
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
@@ -25,6 +16,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
     if connected?(socket) && user_token do
       user = Capstone.Accounts.get_user_by_session_token(user_token)
 
+      available_bots =
+        Bots.get_bots_by_availability_and_ownership(user.id)
+        |> IO.inspect(label: "aaaavailable_bots")
+
       {
         :ok,
         socket
@@ -32,6 +27,11 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:messages, conversation.messages)
         |> assign(:current_user, user)
         |> assign(:ongoing_messages, %{})
+        |> assign(
+          :available_bots,
+          available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user
+        )
+        |> assign(:dropdown_visible, false)
       }
     else
       {
@@ -40,6 +40,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:conversation, conversation)
         |> assign(:messages, conversation.messages)
         |> assign(:ongoing_messages, %{})
+        |> assign(:available_bots, [])
+        |> assign(:dropdown_visible, false)
       }
     end
   end
@@ -52,8 +54,25 @@ defmodule CapstoneWeb.ConversationLive.Show do
      |> assign(:conversation, Conversations.get_conversation!(id))}
   end
 
+  def handle_event("toggle_dropdown", _, socket) do
+    {:noreply, update(socket, :dropdown_visible, &(!&1))}
+  end
+
+  def handle_event("subscribe_bot", %{"bot_id" => bot_id}, socket) do
+    bot = Bots.get_bot!(bot_id)
+    conversation = socket.assigns.conversation
+
+    case Bots.subscribe_to_conversation(bot, conversation) do
+      {:ok, _} ->
+        {:noreply, socket}
+
+      {:error, :already_subscribed} ->
+        {:noreply, socket |> put_flash(:error, "Bot is already subscribed to this conversation")}
+    end
+  end
+
   @impl true
-  def handle_event("new_message", %{"message" => message_params} = message, socket) do
+  def handle_event("new_message", %{"message" => message_params}, socket) do
     attrs =
       message_params
       |> Map.put("conversation_id", socket.assigns.conversation.id)

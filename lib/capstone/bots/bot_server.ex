@@ -114,7 +114,7 @@ defmodule Capstone.Bots.BotServer do
   end
 
   @impl true
-  def handle_info(%{"bot_message" => message}, state) do
+  def handle_info(%{"bot_message" => _message}, state) do
     {:noreply, state}
   end
 
