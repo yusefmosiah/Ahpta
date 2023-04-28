@@ -5,11 +5,8 @@ defmodule Capstone.BotsTest do
 
   setup do
     bot = bot_fixture()
-    pid = :erlang.binary_to_term(bot.bot_server_pid)
 
-    on_exit(fn ->
-      Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
-    end)
+    
 
     {:ok, bot: bot}
   end
@@ -35,7 +32,6 @@ defmodule Capstone.BotsTest do
       assert bot.name == "different name"
 
       #       fixme now that bot_server_pid removed
-      # pid = :erlang.binary_to_term(bot.bot_server_pid)
       # Capstone.Bots.BotServerSupervisor.stop_bot_server(pid)
     end
 

@@ -75,19 +75,24 @@ defmodule Capstone.ConversationsTest do
     @invalid_attrs %{owner_permission: nil, participant_type: nil}
 
     test "list_conversation_participants/0 returns all conversation_participants" do
-      conversation_participant = conversation_participant_fixture()
+      conversation = conversation_fixture()
+
+      conversation_participant =
+        conversation_participant_fixture(%{conversation_id: conversation.id})
+
       assert Conversations.list_conversation_participants() == [conversation_participant]
     end
 
     test "get_conversation_participant!/1 returns the conversation_participant with given id" do
-      conversation_participant = conversation_participant_fixture()
-
+      conversation = conversation_fixture()
+      conversation_participant = conversation_participant_fixture(%{conversation_id: conversation.id})
       assert Conversations.get_conversation_participant!(conversation_participant.id) ==
                conversation_participant
     end
 
     test "create_conversation_participant/1 with valid data creates a conversation_participant" do
-      valid_attrs = %{owner_permission: true, participant_type: "some participant_type"}
+      conversation = conversation_fixture()
+      valid_attrs = %{owner_permission: true, participant_type: "some participant_type", conversation_id: conversation.id}
 
       assert {:ok, %ConversationParticipant{} = conversation_participant} =
                Conversations.create_conversation_participant(valid_attrs)
@@ -102,7 +107,11 @@ defmodule Capstone.ConversationsTest do
     end
 
     test "update_conversation_participant/2 with valid data updates the conversation_participant" do
-      conversation_participant = conversation_participant_fixture()
+      conversation = conversation_fixture()
+
+      conversation_participant =
+        conversation_participant_fixture(%{conversation_id: conversation.id})
+
       update_attrs = %{owner_permission: false, participant_type: "some updated participant_type"}
 
       assert {:ok, %ConversationParticipant{} = conversation_participant} =
@@ -116,7 +125,10 @@ defmodule Capstone.ConversationsTest do
     end
 
     test "update_conversation_participant/2 with invalid data returns error changeset" do
-      conversation_participant = conversation_participant_fixture()
+      conversation = conversation_fixture()
+
+      conversation_participant =
+        conversation_participant_fixture(%{conversation_id: conversation.id})
 
       assert {:error, %Ecto.Changeset{}} =
                Conversations.update_conversation_participant(
@@ -129,7 +141,10 @@ defmodule Capstone.ConversationsTest do
     end
 
     test "delete_conversation_participant/1 deletes the conversation_participant" do
-      conversation_participant = conversation_participant_fixture()
+      conversation = conversation_fixture()
+
+      conversation_participant =
+        conversation_participant_fixture(%{conversation_id: conversation.id})
 
       assert {:ok, %ConversationParticipant{}} =
                Conversations.delete_conversation_participant(conversation_participant)
@@ -140,7 +155,10 @@ defmodule Capstone.ConversationsTest do
     end
 
     test "change_conversation_participant/1 returns a conversation_participant changeset" do
-      conversation_participant = conversation_participant_fixture()
+      conversation = conversation_fixture()
+
+      conversation_participant =
+        conversation_participant_fixture(%{conversation_id: conversation.id})
 
       assert %Ecto.Changeset{} =
                Conversations.change_conversation_participant(conversation_participant)
