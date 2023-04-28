@@ -4,9 +4,14 @@
       <header class="text-center mb-8">
         <h1 class="text-2xl md:text-4xl font-bold text-black mb-2">Conversation <%= @conversation.id %></h1>
         <h2 class="text-base md:text-lg text-black mb-4">This is a conversation record from your database.</h2>
-        <a href={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()} class="inline-block bg-blue-600 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded">
+        <%!-- <a href={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()} class="inline-block bg-blue-600 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded">
           Edit conversation
-        </a>
+        </a> --%>
+
+    <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit conversation</.button>
+    </.link>
+
       </header>
 
 <div class="available-bots">
@@ -19,10 +24,14 @@
       <span class="ml-2">&#x25BC;</span>
     </button>
     <%= if @dropdown_visible do %>
+    <p>nonsense
+    ainctsheaicnthsianctshina
+    </p>
       <div
         class="absolute left-0 mt-2 w-64 bg-opacity-10 border-2 border-white border-opacity-20 rounded shadow-xl z-10">
         <ul class="list-reset">
           <%= for bot <- @available_bots do %>
+          inspect(bo
             <li>
               <button
                 phx-click="subscribe_bot"
