@@ -80,6 +80,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
     case Capstone.Messages.create_message(attrs) do
       {:ok, message} ->
+        # get bot and prepend system message to messages
         messages = [%{role: "user", content: message.content}]
 
         ExOpenAI.Chat.create_chat_completion(messages, "gpt-3.5-turbo",
