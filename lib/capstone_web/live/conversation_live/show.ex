@@ -85,10 +85,14 @@ defmodule CapstoneWeb.ConversationLive.Show do
         # get bot and prepend system message to messages
         messages = [%{role: "user", content: message.content}]
 
-        ExOpenAI.Chat.create_chat_completion(messages, "gpt-3.5-turbo",
+        Logger.info("subscribed bots: #{inspect(socket.assigns.subscribed_bots)}")
+        for bot <- socket.assigns.subscribed_bots do
+          messages = [%{role: "system", content: bot.system_message} | messages]
+          ExOpenAI.Chat.create_chat_completion(messages, "gpt-3.5-turbo",
           stream: true,
           stream_to: self()
-        )
+          )
+        end
 
         CapstoneWeb.Endpoint.broadcast_from(
           self(),
