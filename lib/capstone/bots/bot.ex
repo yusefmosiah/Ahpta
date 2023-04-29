@@ -7,10 +7,8 @@ defmodule Capstone.Bots.Bot do
   schema "bots" do
     field(:is_available_for_rent, :boolean, default: false)
     field(:name, :string)
-
+    field(:system_message, :string, default: "")
     belongs_to(:owner, Capstone.Accounts.User)
-
-    has_many(:system_messages, Capstone.SystemMessages.SystemMessage, foreign_key: :bot_id)
 
     has_many(:conversation_participants, Capstone.Conversations.ConversationParticipant,
       foreign_key: :bot_id
@@ -21,15 +19,8 @@ defmodule Capstone.Bots.Bot do
 
   @doc false
   def changeset(bot, attrs) do
-    atomized_attrs =
-      Enum.map(attrs, fn
-        {k, v} when is_binary(k) -> {String.to_atom(k), v}
-        {k, v} -> {k, v}
-      end)
-      |> Enum.into(%{})
-
     bot
-    |> cast(atomized_attrs, [:name, :is_available_for_rent])
+    |> cast(attrs, [:name, :is_available_for_rent, :system_message])
     |> validate_required([:name, :is_available_for_rent])
   end
 end

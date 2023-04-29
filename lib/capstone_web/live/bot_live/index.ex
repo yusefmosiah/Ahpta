@@ -107,7 +107,7 @@ defmodule CapstoneWeb.BotLive.Index do
     >
       <:col :let={{_id, bot}} label="Name"><%= bot.name %></:col>
       <:col :let={{_id, bot}} label="Is available for rent"><%= bot.is_available_for_rent %></:col>
-      <%!-- <:col :let={{_id, bot}} label="System Message"><%= bot.system_messages |> Enum.at(0, "") %></:col> <!-- Add this line --> --%>
+      <:col :let={{_id, bot}} label="System Message"><%= bot.system_message %></:col>
       <:action :let={{_id, bot}}>
         <div class="sr-only">
           <.link navigate={~p"/bots/#{bot}"}>Show</.link>

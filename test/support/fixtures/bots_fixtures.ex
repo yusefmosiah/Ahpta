@@ -12,7 +12,8 @@ defmodule Capstone.BotsFixtures do
       attrs
       |> Enum.into(%{
         is_available_for_rent: true,
-        name: "some name"
+        name: "some name",
+        system_message: "some system message"
       })
       |> Capstone.Bots.create_bot()
 
