@@ -82,13 +82,14 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
     case Capstone.Messages.create_message(attrs) do
       {:ok, message} ->
-        messages = [%{role: "user", content: message.content}]
+        user_msg = %{role: "user", content: message.content}
+        context = get_context(socket.assigns.messages) ++ [user_msg]
 
-        Logger.info("subscribed bots: #{inspect(socket.assigns.subscribed_bots)}")
+
+        Logger.info("111ccccontext: #{inspect(context)}")
 
         for bot <- socket.assigns.subscribed_bots do
-          messages = [%{role: "system", content: bot.system_message} | messages]
-
+          messages = [%{role: "system", content: bot.system_message} | context]
           chat_module().create_chat_completion(messages, "gpt-3.5-turbo",
             stream: true,
             stream_to: self()
@@ -197,6 +198,45 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   defp page_title(:show), do: "Show Conversation"
   defp page_title(:edit), do: "Edit Conversation"
+
+  def get_context(messages, max_chars \\ 15000) do
+    messages
+    |> Enum.reverse()
+    |> Enum.reduce_while({0, []}, fn message, {sum, result} ->
+      content_length = byte_size(message.content)
+
+      if sum + content_length <= max_chars do
+        {:cont, {sum + content_length, [message | result]}}
+      else
+        {:halt, {sum, result}}
+      end
+    end)
+    |> elem(1)
+    |> IO.inspect(label: "pppprecontext")
+    |> Enum.map(fn
+      %Capstone.Messages.Message{content: content, message_type: "bot"} ->
+        %{content: content, role: "assistant"}
+
+      %Capstone.Messages.Message{content: content, message_type: "human"} ->
+        %{content: content, role: "user"}
+    end)
+  end
+
+  def checkpoint(context, model \\ "gpt-3.5-turbo") do
+    msgs = [
+      %{
+        role: "system",
+        content: """
+        Make a checkpoint (aka snapshot, summary) that consisely represents the content of the previous messages, possibly including a previous checkpoint.
+        Begin the checkpoint message with "Checkpoint:".
+        Remember, the checkpoint message will be included in the context of the next messages, and the user expects the chat to continue as though the context limit doesn't exist.
+        """
+      }
+      | context
+    ]
+
+    chat_module().create_chat_completion(msgs |> Enum.reverse(), model)
+  end
 
   defp chat_module do
     Application.get_env(:capstone, :chat_module)

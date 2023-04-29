@@ -58,7 +58,6 @@ defmodule Capstone.Messages do
   def create_message(attrs \\ %{}) do
     %Message{}
     |> Message.changeset(attrs)
-    # |> Repo.preload(:sender) # ** (UndefinedFunctionError) function Ecto.Changeset.__schema__/2 is undefined or private
     |> Repo.insert()
   end
 
