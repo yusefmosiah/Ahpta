@@ -19,7 +19,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
       available_bots =
         Bots.get_bots_by_availability_and_ownership(user.id)
-        |> IO.inspect(label: "aaaavailable_bots")
 
       {
         :ok,
@@ -58,8 +57,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   def handle_event("toggle_dropdown", _, socket) do
-    IO.inspect(socket.assigns.dropdown_visible, label: "socket.assigns.dropdown_visible")
-    IO.inspect(socket.assigns, label: "ssssssocket.assigns")
     {:noreply, update(socket, :dropdown_visible, &(!&1))}
   end
 

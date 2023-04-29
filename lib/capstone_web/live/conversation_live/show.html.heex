@@ -34,12 +34,9 @@
             Select a bot <span class="ml-2">&#x25BC;</span>
           </button>
           <%= if @dropdown_visible do %>
-            <p>nonsense
-              ainctsheaicnthsianctshina</p>
             <div class="absolute left-0 z-10 mt-2 w-64 rounded border-2 border-white border-opacity-20 bg-opacity-10 shadow-xl">
               <ul class="list-reset">
                 <%= for bot <- @available_bots do %>
-                  inspect(bo
                   <li>
                     <button
                       phx-click="subscribe_bot"
@@ -97,10 +94,10 @@
         <form phx-submit="new_message">
           <label for="content" class="font-bold text-black">Content:</label>
           <input
-            type="text"
+            type="textarea"
             id="content"
             name="message[content]"
-            class="mb-3 w-full appearance-none rounded border px-3 py-2 leading-tight text-black shadow focus:shadow-outline focus:outline-none"
+            class="autoresize mb-3 w-full appearance-none rounded border px-3 py-2 leading-tight text-black shadow focus:shadow-outline focus:outline-none"
             required
           />
           <input

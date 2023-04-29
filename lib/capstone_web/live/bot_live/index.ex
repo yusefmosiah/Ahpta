@@ -11,7 +11,6 @@ defmodule CapstoneWeb.BotLive.Index do
 
     bots =
       Bots.list_bots()
-      |> IO.inspect(label: "bbbbbots")
 
     {:ok, stream(socket, :bots, bots) |> assign(:conversations, conversations)}
   end
