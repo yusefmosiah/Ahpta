@@ -160,25 +160,23 @@ defmodule Capstone.Bots do
   end
 
   def list_subscribed_conversations(%Bot{} = bot) do
-    query =
-      from(cp in ConversationParticipant,
-        join: c in assoc(cp, :conversation),
-        where: cp.bot_id == ^bot.id,
-        select: c
-      )
-
-    Repo.all(query)
+    from(cp in ConversationParticipant,
+      where: cp.bot_id == ^bot.id,
+      preload: :conversation
+    )
+    |> Repo.all()
+    |> Enum.map(& &1.conversation)
   end
 
   def list_subscribed_bots_for_conversation(%Conversation{} = conversation) do
-    query = from(cp in ConversationParticipant,
-      where: cp.conversation_id == ^conversation.id,
-      where: cp.participant_type == "bot",
-      preload: :bot
-    )
+    query =
+      from(cp in ConversationParticipant,
+        where: cp.conversation_id == ^conversation.id,
+        where: cp.participant_type == "bot",
+        preload: :bot
+      )
 
     participants = Repo.all(query)
     Enum.map(participants, & &1.bot)
   end
-
 end
