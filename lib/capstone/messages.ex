@@ -107,4 +107,14 @@ defmodule Capstone.Messages do
   def change_message(%Message{} = message, attrs \\ %{}) do
     Message.changeset(message, attrs)
   end
+
+  def to_openai_format(messages) do
+    Enum.map(messages, fn
+      %Capstone.Messages.Message{content: content, message_type: "bot"} ->
+        %{content: content, role: "assistant"}
+
+      %Capstone.Messages.Message{content: content, message_type: "human"} ->
+        %{content: content, role: "user"}
+    end)
+  end
 end

@@ -5,6 +5,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   alias Capstone.Conversations
   alias Capstone.Bots
+  alias Capstone.Messages
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
@@ -33,6 +34,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
         )
         |> assign(:dropdown_visible, false)
         |> assign(:subscribed_bots, subscribed_bots)
+        |> assign(:context, get_context(conversation.messages))
+        |> assign(:summary, "")
       }
     else
       {
@@ -44,6 +47,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:available_bots, [])
         |> assign(:dropdown_visible, false)
         |> assign(:subscribed_bots, subscribed_bots)
+        |> assign(:context, get_context(conversation.messages))
+        |> assign(:summary, "")
       }
     end
   end
@@ -84,12 +89,13 @@ defmodule CapstoneWeb.ConversationLive.Show do
       {:ok, message} ->
         user_msg = %{role: "user", content: message.content}
         context = get_context(socket.assigns.messages) ++ [user_msg]
-
+        summarize_if_needed(context)
 
         Logger.info("111ccccontext: #{inspect(context)}")
 
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | context]
+
           chat_module().create_chat_completion(messages, "gpt-3.5-turbo",
             stream: true,
             stream_to: self()
@@ -103,7 +109,9 @@ defmodule CapstoneWeb.ConversationLive.Show do
           message
         )
 
-        {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
+        {:noreply,
+         socket
+         |> assign(:messages, socket.assigns.messages ++ [message])}
 
       {:error, reason} ->
         Logger.error("Error creating message: #{inspect(reason)}")
@@ -118,8 +126,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   @impl true
   def handle_info(%{event: "streaming_message", payload: payload}, socket) do
-    Logger.info("got streaming message: #{inspect(payload)}")
-
     ongoing_messages =
       Map.update(
         socket.assigns.ongoing_messages,
@@ -141,9 +147,16 @@ defmodule CapstoneWeb.ConversationLive.Show do
      |> assign(:messages, socket.assigns.messages ++ [message.payload.bot_message])}
   end
 
-  def handle_data(%{choices: [%{delta: %{content: content}}], id: id} = data, socket) do
-    Logger.info("got data: #{inspect(data)}")
+  def handle_info({:summary, message}, socket) do
+    IO.inspect(message, label: "sssssummary message")
 
+    {:noreply,
+     socket
+     |> assign(:context, [message | get_context(socket.assigns.messages)])
+     |> assign(:summary, message.content)}
+  end
+
+  def handle_data(%{choices: [%{delta: %{content: content}}], id: id}, socket) do
     ongoing_messages = Map.update(socket.assigns.ongoing_messages, id, content, &(&1 <> content))
 
     CapstoneWeb.Endpoint.broadcast_from(
@@ -159,7 +172,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
   @impl true
   def handle_data(%{choices: [%{delta: %{}, finish_reason: "stop"}], id: id}, socket) do
     content = Map.get(socket.assigns.ongoing_messages, id)
-    Logger.info("ccccontent: #{inspect(content)}")
 
     attrs = %{
       "conversation_id" => socket.assigns.conversation.id,
@@ -199,9 +211,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
   defp page_title(:show), do: "Show Conversation"
   defp page_title(:edit), do: "Edit Conversation"
 
-  def get_context(messages, max_chars \\ 15000) do
+  def get_context(messages, max_chars \\ 14000) do
     messages
     |> Enum.reverse()
+    |> Messages.to_openai_format()
     |> Enum.reduce_while({0, []}, fn message, {sum, result} ->
       content_length = byte_size(message.content)
 
@@ -213,16 +226,15 @@ defmodule CapstoneWeb.ConversationLive.Show do
     end)
     |> elem(1)
     |> IO.inspect(label: "pppprecontext")
-    |> Enum.map(fn
-      %Capstone.Messages.Message{content: content, message_type: "bot"} ->
-        %{content: content, role: "assistant"}
-
-      %Capstone.Messages.Message{content: content, message_type: "human"} ->
-        %{content: content, role: "user"}
-    end)
   end
 
-  def checkpoint(context, model \\ "gpt-3.5-turbo") do
+  def summarize_if_needed(messages) do
+    if messages |> Enum.map(& &1.content) |> Enum.join("\n") |> byte_size() > 14000 do
+      summarize(messages)
+    end
+  end
+
+  def summarize(context, model \\ "gpt-3.5-turbo") do
     msgs = [
       %{
         role: "system",
@@ -235,7 +247,12 @@ defmodule CapstoneWeb.ConversationLive.Show do
       | context
     ]
 
-    chat_module().create_chat_completion(msgs |> Enum.reverse(), model)
+    Task.async(fn ->
+      Logger.info("!!!! in summarization task")
+      {:ok, response} = chat_module().create_chat_completion(msgs, model)
+
+      send(self(), {:summary, response.choices |> List.first() |> Map.get(:message)})
+    end)
   end
 
   defp chat_module do
