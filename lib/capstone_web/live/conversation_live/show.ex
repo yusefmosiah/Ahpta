@@ -82,7 +82,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
     case Capstone.Messages.create_message(attrs) do
       {:ok, message} ->
-        # get bot and prepend system message to messages
         messages = [%{role: "user", content: message.content}]
 
         Logger.info("subscribed bots: #{inspect(socket.assigns.subscribed_bots)}")
@@ -90,7 +89,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | messages]
 
-          ExOpenAI.Chat.create_chat_completion(messages, "gpt-3.5-turbo",
+          chat_module().create_chat_completion(messages, "gpt-3.5-turbo",
             stream: true,
             stream_to: self()
           )
@@ -198,4 +197,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   defp page_title(:show), do: "Show Conversation"
   defp page_title(:edit), do: "Edit Conversation"
+
+  defp chat_module do
+    Application.get_env(:capstone, :chat_module)
+  end
 end

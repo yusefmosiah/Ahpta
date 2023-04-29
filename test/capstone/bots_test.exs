@@ -108,12 +108,12 @@ defmodule Capstone.BotsTest do
       bot: bot,
       conversation: conversation
     } do
-      assert [] == Bots.list_subscribed_conversations(bot)
+      assert [] == Bots.list_subscribed_conversations(bot.id)
 
       assert {:ok, %ConversationParticipant{} = _cp} =
                Bots.subscribe_to_conversation(bot, conversation)
 
-      assert [conversation] == Bots.list_subscribed_conversations(bot)
+      assert [conversation.id] == Bots.list_subscribed_conversations(bot.id)
     end
   end
 end
