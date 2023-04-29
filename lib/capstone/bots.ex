@@ -159,13 +159,13 @@ defmodule Capstone.Bots do
     end
   end
 
-  def list_subscribed_conversations(%Bot{} = bot) do
+  def list_subscribed_conversations(bot_id) do
     from(cp in ConversationParticipant,
-      where: cp.bot_id == ^bot.id,
+      where: cp.bot_id == ^bot_id,
       preload: :conversation
     )
     |> Repo.all()
-    |> Enum.map(& &1.conversation)
+    |> Enum.map(& &1.conversation.id)
   end
 
   def list_subscribed_bots_for_conversation(%Conversation{} = conversation) do

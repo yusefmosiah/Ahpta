@@ -9,6 +9,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   @impl true
   def mount(%{"id" => id}, session, socket) do
     user_token = Map.get(session, "user_token")
+
     conversation = Conversations.get_conversation!(id)
     subscribed_bots = Bots.list_subscribed_bots_for_conversation(conversation)
 
@@ -185,14 +186,12 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   @impl true
-  # callback on error
   def handle_error(e, socket) do
     Logger.error("Handle_Error: #{inspect(e)}")
     {:noreply, socket}
   end
 
   @impl true
-  # callback on finish
   def handle_finish(socket) do
     {:noreply, socket}
   end

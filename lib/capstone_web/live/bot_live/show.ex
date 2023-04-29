@@ -13,7 +13,8 @@ defmodule CapstoneWeb.BotLive.Show do
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:bot, Bots.get_bot!(id))}
+     |> assign(:bot, Bots.get_bot!(id))
+     |> assign(:subscribed_conversations, Bots.list_subscribed_conversations(id))}
   end
 
   @impl true
@@ -32,6 +33,9 @@ defmodule CapstoneWeb.BotLive.Show do
     <.list>
       <:item title="Name"><%= @bot.name %></:item>
       <:item title="Is available for rent"><%= @bot.is_available_for_rent %></:item>
+      <:item title="System Message"><%= @bot.system_message %></:item>
+      <:item title="Subscribed to topics"><%= @subscribed_conversations |> Enum.map(& &1 <> " | ") %></:item>
+
     </.list>
 
     <.back navigate={~p"/bots"}>Back to bots</.back>
