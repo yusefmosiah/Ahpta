@@ -17,8 +17,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
     if connected?(socket) && user_token do
       user = Capstone.Accounts.get_user_by_session_token(user_token)
 
-      available_bots =
-        Bots.get_bots_by_availability_and_ownership(user.id)
+      available_bots = Bots.get_bots_by_availability_and_ownership(user.id)
 
       {
         :ok,
@@ -86,11 +85,13 @@ defmodule CapstoneWeb.ConversationLive.Show do
         messages = [%{role: "user", content: message.content}]
 
         Logger.info("subscribed bots: #{inspect(socket.assigns.subscribed_bots)}")
+
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | messages]
+
           ExOpenAI.Chat.create_chat_completion(messages, "gpt-3.5-turbo",
-          stream: true,
-          stream_to: self()
+            stream: true,
+            stream_to: self()
           )
         end
 
@@ -105,57 +106,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
       {:error, reason} ->
         Logger.error("Error creating message: #{inspect(reason)}")
-        {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_data(data, socket) do
-    # refactor to case
-    with %ExOpenAI.Components.CreateChatCompletionResponse{
-           choices: [%{delta: %{content: content}}],
-           id: id
-         } <- data do
-      Logger.info("got data: #{inspect(data)}")
-
-      ongoing_messages =
-        Map.update(socket.assigns.ongoing_messages, id, content, &(&1 <> content))
-
-      CapstoneWeb.Endpoint.broadcast_from(
-        self(),
-        "convo:#{socket.assigns.conversation.id}",
-        "streaming_message",
-        %{id: id, content: content}
-      )
-
-      {:noreply, assign(socket, :ongoing_messages, ongoing_messages)}
-    else
-      %ExOpenAI.Components.CreateChatCompletionResponse{
-        choices: [%{delta: %{}, finish_reason: "stop"}],
-        id: id
-      } ->
-        content = Map.get(socket.assigns.ongoing_messages, id)
-        Logger.info("ccccontent: #{inspect(content)}")
-
-        attrs = %{
-          "conversation_id" => socket.assigns.conversation.id,
-          "sender_id" => socket.assigns.current_user.id,
-          "content" => content,
-          "message_type" => "bot"
-        }
-
-        {:ok, bot_message} = Capstone.Messages.create_message(attrs)
-
-        CapstoneWeb.Endpoint.broadcast(
-          "convo:#{socket.assigns.conversation.id}",
-          "finished_streaming",
-          %{bot_message: bot_message, id: id}
-        )
-
-        {:noreply, socket}
-
-      _ ->
-        Logger.info("weird got data: #{inspect(data)}")
         {:noreply, socket}
     end
   end
@@ -188,6 +138,50 @@ defmodule CapstoneWeb.ConversationLive.Show do
      socket
      |> assign(:ongoing_messages, ongoing_messages)
      |> assign(:messages, socket.assigns.messages ++ [message.payload.bot_message])}
+  end
+
+  def handle_data(%{choices: [%{delta: %{content: content}}], id: id} = data, socket) do
+    Logger.info("got data: #{inspect(data)}")
+
+    ongoing_messages = Map.update(socket.assigns.ongoing_messages, id, content, &(&1 <> content))
+
+    CapstoneWeb.Endpoint.broadcast_from(
+      self(),
+      "convo:#{socket.assigns.conversation.id}",
+      "streaming_message",
+      %{id: id, content: content}
+    )
+
+    {:noreply, assign(socket, :ongoing_messages, ongoing_messages)}
+  end
+
+  @impl true
+  def handle_data(%{choices: [%{delta: %{}, finish_reason: "stop"}], id: id}, socket) do
+    content = Map.get(socket.assigns.ongoing_messages, id)
+    Logger.info("ccccontent: #{inspect(content)}")
+
+    attrs = %{
+      "conversation_id" => socket.assigns.conversation.id,
+      "sender_id" => socket.assigns.current_user.id,
+      "content" => content,
+      "message_type" => "bot"
+    }
+
+    {:ok, bot_message} = Capstone.Messages.create_message(attrs)
+
+    CapstoneWeb.Endpoint.broadcast(
+      "convo:#{socket.assigns.conversation.id}",
+      "finished_streaming",
+      %{bot_message: bot_message, id: id}
+    )
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_data(data, socket) do
+    Logger.info("weird got data: #{inspect(data)}")
+    {:noreply, socket}
   end
 
   @impl true
