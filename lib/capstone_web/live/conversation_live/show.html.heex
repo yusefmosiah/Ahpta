@@ -74,7 +74,7 @@
               class="bg-backdrop bg-blur shadow-glass rounded-xl bg-opacity-60 p-4 md:p-6"
             >
               <strong class="text-lg font-bold text-black md:text-xl">
-                <%= message.sender_id %>:
+                <%!-- <%= message.sender_id %>: --%>
               </strong>
               <p class="text-base text-black text-opacity-90 md:text-lg">
                 <%= message.content %>
@@ -86,7 +86,7 @@
               id={id}
               class="bg-backdrop bg-blur shadow-glass rounded-xl bg-opacity-60 p-4 md:p-6"
             >
-              <strong class="text-lg font-bold text-black md:text-xl"><%= id %>:</strong>
+              <%!-- <strong class="text-lg font-bold text-black md:text-xl"><%= id %>:</strong> --%>
               <p class="text-base text-black text-opacity-90 md:text-lg"><%= content %></p>
             </li>
           <% end %>

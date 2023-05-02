@@ -57,6 +57,8 @@ defmodule Capstone.Bots do
   """
   def get_bot!(id), do: Repo.get!(Bot, id)
 
+  def get_bot(id), do: Repo.get(Bot, id)
+
   @doc """
   Creates a bot.
 
