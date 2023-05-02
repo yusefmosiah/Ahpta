@@ -17,7 +17,7 @@ defmodule Capstone.Application do
       # Start Finch
       {Finch, name: Capstone.Finch},
       # Start the Endpoint (http/https)
-      CapstoneWeb.Endpoint,
+      CapstoneWeb.Endpoint
       # Start a worker by calling: Capstone.Worker.start_link(arg)
       # {Capstone.Worker, arg}
     ]
