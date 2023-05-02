@@ -20,7 +20,7 @@ defmodule CapstoneWeb.BotLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-        <.header>
+    <.header>
       Bot <%= @bot.id %>
       <:subtitle>This is a bot record from your database.</:subtitle>
       <:actions>
@@ -34,8 +34,9 @@ defmodule CapstoneWeb.BotLive.Show do
       <:item title="Name"><%= @bot.name %></:item>
       <:item title="Is available for rent"><%= @bot.is_available_for_rent %></:item>
       <:item title="System Message"><%= @bot.system_message %></:item>
-      <:item title="Subscribed to topics"><%= @subscribed_conversations |> Enum.map(& &1 <> " | ") %></:item>
-
+      <:item title="Subscribed to topics">
+        <%= @subscribed_conversations |> Enum.map(&(&1 <> " | ")) %>
+      </:item>
     </.list>
 
     <.back navigate={~p"/bots"}>Back to bots</.back>

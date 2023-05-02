@@ -148,8 +148,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   def handle_info({:summary, message}, socket) do
-    IO.inspect(message, label: "sssssummary message")
-
     {:noreply,
      socket
      |> assign(:context, [message | get_context(socket.assigns.messages)])
@@ -225,7 +223,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
       end
     end)
     |> elem(1)
-    |> IO.inspect(label: "pppprecontext")
   end
 
   def summarize_if_needed(messages) do

@@ -9,8 +9,7 @@ defmodule CapstoneWeb.BotLive.Index do
   def mount(_params, _session, socket) do
     conversations = Conversations.list_conversations()
 
-    bots =
-      Bots.list_bots()
+    bots = Bots.list_bots()
 
     {:ok, stream(socket, :bots, bots) |> assign(:conversations, conversations)}
   end

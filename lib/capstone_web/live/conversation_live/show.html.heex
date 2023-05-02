@@ -14,20 +14,19 @@
         </.link>
       </header>
 
-<div class="summary">
-  <h3>Summary</h3>
-      <%= @summary %>
-</div>
+      <div class="summary">
+        <h3>Summary</h3>
+        <%= @summary %>
+      </div>
 
-<div class="subscribed-bots">
-  <h3>Subscribed Bots:</h3>
-  <ul>
-    <%= for bot <- @subscribed_bots do %>
-      <li><%= bot.name %></li>
-    <% end %>
-  </ul>
-</div>
-
+      <div class="subscribed-bots">
+        <h3>Subscribed Bots:</h3>
+        <ul>
+          <%= for bot <- @subscribed_bots do %>
+            <li><%= bot.name %></li>
+          <% end %>
+        </ul>
+      </div>
 
       <div class="available-bots">
         <h3>Available bots to subscribe:</h3>
