@@ -23,9 +23,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
       available_bots = Bots.get_bots_by_availability_and_ownership(user.id)
 
       available_bots =
-        (available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user)
+        available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user
 
-      bot_options = available_bots |> Enum.with_index(fn bot, index -> %{id: index, label: bot.name} end)
+      bot_options =
+        available_bots |> Enum.with_index(fn bot, index -> %{id: index, label: bot.name} end)
 
       {
         :ok,
@@ -170,13 +171,15 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
   def handle_info({:updated_options, options}, socket) do
     Logger.info("Updated options: #{inspect(options)}")
-    #fixme handle unsubsciption. perhaps by unsubscribing all before the for comprehension?
+    # fixme handle unsubsciption. perhaps by unsubscribing all before the for comprehension?
     # or with a function that takes a list of bots and a conversation and marks subscribed only those on the list
-    subscribed_bots = for option <- options, option.selected do
-      bot = Bots.get_bot_by_name(option.label)
-      Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
-      bot
-    end
+    subscribed_bots =
+      for option <- options, option.selected do
+        bot = Bots.get_bot_by_name(option.label)
+        Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
+        bot
+      end
+
     {:noreply, socket |> assign(:subscribed_bots, subscribed_bots)}
   end
 
@@ -286,80 +289,89 @@ defmodule CapstoneWeb.ConversationLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <.header>
-      <h1>Conversation <%= @conversation.id %></h1>
-      <h2>This is a conversation record from your database.</h2>
+      <div class="container mx-auto max-w-screen-xl px-4">
+        <div class="mx-auto px-2 py-6 dark:bg-black">
+          <.header>
+            <h1 class="font-mono mb-6 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
+              Conversation <%= @conversation.id %>
+            </h1>
+            <h2>This is a conversation record from your database.</h2>
 
-      <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()}>
-        <.button>Edit conversation</.button>
-      </.link>
-    </.header>
+            <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()} class="inline-block">
+              <.button class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400">
+                Edit conversation
+              </.button>
+            </.link>
+          </.header>
 
-    <div>
-      <h3>Summary</h3>
-      <%= @summary %>
+          <div class="rounded-lg bg-white bg-opacity-40 p-6 text-lg shadow-md backdrop-blur-md dark:bg-black dark:bg-opacity-50">
+            <h3>Summary</h3>
+            <p class="space-y-2 whitespace-pre-wrap leading-relaxed text-gray-900 dark:text-gray-300">
+              <%= @summary %>
+            </p>
+          </div>
+
+          <div class="mt-6 space-y-4">
+            <h3>Subscribed Bots:</h3>
+            <ul>
+              <%= for bot <- @subscribed_bots do %>
+                <li class="whitespace-pre-wrap text-gray-900 dark:text-gray-300">
+                  <%= bot.name %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+
+          <div class="mt-6 space-y-4">
+            <h3>Topic:</h3>
+            <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300"><%= @conversation.topic %></p>
+            <h3>Is published:</h3>
+            <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300"><%= @conversation.is_published %></p>
+          </div>
+
+          <div>
+            <h2>Messages:</h2>
+            <ul id="message-list" phx-update="replace" class="space-y-4">
+              <%= for message <- @messages do %>
+                <li id={message.id} class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50">
+                  <strong>
+                  </strong>
+                  <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300">
+                    <%= message.content %>
+                  </p>
+                </li>
+              <% end %>
+              <%= for {id, content} <- @ongoing_messages do %>
+                <li id={id} class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50">
+                  <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300"><%= content %></p>
+                </li>
+              <% end %>
+    </ul>
     </div>
-
-    <div>
-      <h3>Subscribed Bots:</h3>
-      <ul>
-        <%= for bot <- @subscribed_bots do %>
-          <li><%= bot.name %></li>
-        <% end %>
-      </ul>
-    </div>
-
-    <div>
-      <h3>Topic:</h3>
-      <p><%= @conversation.topic %></p>
-      <h3>Is published:</h3>
-      <p><%= @conversation.is_published %></p>
-    </div>
-
-    <div>
-      <h2>Messages:</h2>
-      <ul id="message-list" phx-update="replace">
-        <%= for message <- @messages do %>
-          <li id={message.id}>
-            <strong>
-              <%!-- <%= message.sender_id %>: --%>
-            </strong>
-            <p><%= message.content %></p>
-          </li>
-        <% end %>
-        <%= for {id, content} <- @ongoing_messages do %>
-          <li id={id}>
-            <%!-- <strong><%= id %>:</strong> --%>
-            <p><%= content %></p>
-          </li>
-        <% end %>
-      </ul>
-    </div>
-
-    <div>
+    <div class="mt-6 space-y-4">
       <h2>New Message:</h2>
-      <.form :let={f} for={%{}} as={:input} phx-submit="new_message">
+      <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="mt-10 flex items-center">
         <MultiSelect.multi_select
           id="some-id"
           options={@bot_options}
           form={f}
           on_change={fn opts -> send(self(), {:updated_options, opts}) end}
           placeholder="bots to send this message to..."
-
+          class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
         />
         <label for="content">Content:</label>
-        <input type="textarea" id="content" name="message[content]" required />
+        <input type="textarea" id="content" name="message[content]" required class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" />
         <input type="hidden" id="message_type" name="message[message_type]" value="human" required />
-        <.button type="submit">
+        <.button type="submit" class="font-mono ml-2 rounded rounded-md border-4 border-double border-blue-400 bg-none p-1.5 py-4 text-blue-500 hover:border-blue-200 hover:bg-blue-500 hover:text-white dark:hover:border-blue-200 dark:hover:text-white">
           Send
         </.button>
       </.form>
     </div>
 
-    <div>
-      <a href={~p"/conversations"}>
+    <div class="mt-6 mb-10 flex items-center justify-between">
+      <.link navigate={~p"/conversations"} class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400">
         Back to conversations
-      </a>
+      </.link>
     </div>
 
     <.modal
@@ -379,6 +391,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
         />
       </div>
     </.modal>
+    </div>
+    </div>
     """
   end
 
