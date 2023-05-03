@@ -4,7 +4,6 @@ defmodule CapstoneWeb.BotLiveTest do
   import Phoenix.LiveViewTest
   import Capstone.BotsFixtures
 
-  @create_attrs %{is_available_for_rent: true, name: "some name"}
   @update_attrs %{is_available_for_rent: false, name: "some updated name"}
   @invalid_attrs %{is_available_for_rent: false, name: nil}
 
@@ -37,14 +36,14 @@ defmodule CapstoneWeb.BotLiveTest do
              |> render_change() =~ "can&#39;t be blank"
 
       assert index_live
-             |> form("#bot-form", bot: @create_attrs)
+             |> form("#bot-form", bot: %{is_available_for_rent: true, name: "unique name"})
              |> render_submit()
 
       assert_patch(index_live, ~p"/bots")
 
       html = render(index_live)
-      # assert html =~ "Bot created successfully"
-      # assert html =~ "some name"
+      assert html =~ "Bot created successfully"
+      assert html =~ "unique name"
     end
 
     test "updates bot in listing", %{conn: conn, bot: bot} do
