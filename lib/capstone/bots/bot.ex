@@ -22,5 +22,6 @@ defmodule Capstone.Bots.Bot do
     bot
     |> cast(attrs, [:name, :is_available_for_rent, :system_message])
     |> validate_required([:name, :is_available_for_rent])
+    |> unique_constraint(:name)
   end
 end

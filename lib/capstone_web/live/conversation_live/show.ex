@@ -24,7 +24,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
       available_bots =
         (available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user)
-        |> Enum.with_index(fn bot, index -> %{id: index, label: bot.name} end)
+
+      bot_options = available_bots |> Enum.with_index(fn bot, index -> %{id: index, label: bot.name} end)
 
       {
         :ok,
@@ -34,6 +35,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:current_user, user)
         |> assign(:ongoing_messages, %{})
         |> assign(:available_bots, available_bots)
+        |> assign(:bot_options, bot_options)
         |> assign(:dropdown_visible, false)
         |> assign(:subscribed_bots, subscribed_bots)
         |> assign(:context, get_context(conversation.messages))
@@ -49,6 +51,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:available_bots, [])
         |> assign(:dropdown_visible, false)
         |> assign(:subscribed_bots, subscribed_bots)
+        |> assign(:bot_options, [])
         |> assign(:context, get_context(conversation.messages))
         |> assign(:summary, "")
       }
@@ -163,6 +166,18 @@ defmodule CapstoneWeb.ConversationLive.Show do
      socket
      |> assign(:context, [message | get_context(socket.assigns.messages)])
      |> assign(:summary, message.content)}
+  end
+
+  def handle_info({:updated_options, options}, socket) do
+    Logger.info("Updated options: #{inspect(options)}")
+    #fixme handle unsubsciption. perhaps by unsubscribing all before the for comprehension?
+    # or with a function that takes a list of bots and a conversation and marks subscribed only those on the list
+    subscribed_bots = for option <- options, option.selected do
+      bot = Bots.get_bot_by_name(option.label)
+      Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
+      bot
+    end
+    {:noreply, socket |> assign(:subscribed_bots, subscribed_bots)}
   end
 
   def handle_info(message, socket) do
@@ -326,7 +341,11 @@ defmodule CapstoneWeb.ConversationLive.Show do
       <.form :let={f} for={%{}} as={:input} phx-submit="new_message">
         <MultiSelect.multi_select
           id="some-id"
-          options={@available_bots}
+          options={@bot_options}
+          form={f}
+          on_change={fn opts -> send(self(), {:updated_options, opts}) end}
+          placeholder="bots to send this message to..."
+
         />
         <label for="content">Content:</label>
         <input type="textarea" id="content" name="message[content]" required />

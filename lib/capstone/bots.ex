@@ -23,6 +23,10 @@ defmodule Capstone.Bots do
     Repo.all(Bot)
   end
 
+  def get_bot_by_name(name) do
+    Repo.get_by(Bot, name: name)
+  end
+
   def get_bots_by_availability_and_ownership(user_id) do
     all_bots = Repo.all(Bot)
 
