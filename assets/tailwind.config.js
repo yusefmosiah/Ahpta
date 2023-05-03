@@ -5,14 +5,20 @@ const plugin = require("tailwindcss/plugin")
 const fs = require("fs")
 const path = require("path")
 
+const colors = require("tailwindcss/colors")
 module.exports = {
   content: [
     "./js/**/*.js",
     "../lib/*_web.ex",
-    "../lib/*_web/**/*.*ex"
+    "../lib/*_web/**/*.*ex",
+    "../deps/phoenix_multi_select/lib/*.ex",
   ],
   theme: {
-    extend: {
+    extend: {        colors: {
+
+            primary: colors.blue,
+    },
+
       backgroundColor: {
         'backdrop': 'rgba(255, 255, 255, 0.8)',
       },

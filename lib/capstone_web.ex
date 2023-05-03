@@ -90,6 +90,9 @@ defmodule CapstoneWeb do
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 
+      # phx-multi-select
+      use Phoenix.LiveView.Components.MultiSelect
+
       # Routes generation with the ~p sigil
       unquote(verified_routes())
     end

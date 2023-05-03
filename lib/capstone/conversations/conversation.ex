@@ -9,7 +9,8 @@ defmodule Capstone.Conversations.Conversation do
     field :topic, :string
 
     has_many :conversation_participants, Capstone.Conversations.ConversationParticipant,
-      foreign_key: :conversation_id, on_delete: :delete_all
+      foreign_key: :conversation_id,
+      on_delete: :delete_all
 
     has_many :messages, Capstone.Messages.Message, foreign_key: :conversation_id
 

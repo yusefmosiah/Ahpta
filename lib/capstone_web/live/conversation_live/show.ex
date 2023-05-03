@@ -6,6 +6,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   alias Capstone.Conversations
   alias Capstone.Bots
   alias Capstone.Messages
+  alias Phoenix.LiveView.Components.MultiSelect
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
@@ -21,6 +22,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
 
       available_bots = Bots.get_bots_by_availability_and_ownership(user.id)
 
+      available_bots =
+        (available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user)
+        |> Enum.with_index(fn bot, index -> %{id: index, label: bot.name} end)
+
       {
         :ok,
         socket
@@ -28,10 +33,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
         |> assign(:messages, conversation.messages)
         |> assign(:current_user, user)
         |> assign(:ongoing_messages, %{})
-        |> assign(
-          :available_bots,
-          available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user
-        )
+        |> assign(:available_bots, available_bots)
         |> assign(:dropdown_visible, false)
         |> assign(:subscribed_bots, subscribed_bots)
         |> assign(:context, get_context(conversation.messages))
@@ -264,6 +266,101 @@ defmodule CapstoneWeb.ConversationLive.Show do
       Logger.info("$$$$ got summary: #{inspect(summary)}")
       send(self(), {:summary, summary})
     end)
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <.header>
+      <h1>Conversation <%= @conversation.id %></h1>
+      <h2>This is a conversation record from your database.</h2>
+
+      <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()}>
+        <.button>Edit conversation</.button>
+      </.link>
+    </.header>
+
+    <div>
+      <h3>Summary</h3>
+      <%= @summary %>
+    </div>
+
+    <div>
+      <h3>Subscribed Bots:</h3>
+      <ul>
+        <%= for bot <- @subscribed_bots do %>
+          <li><%= bot.name %></li>
+        <% end %>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Topic:</h3>
+      <p><%= @conversation.topic %></p>
+      <h3>Is published:</h3>
+      <p><%= @conversation.is_published %></p>
+    </div>
+
+    <div>
+      <h2>Messages:</h2>
+      <ul id="message-list" phx-update="replace">
+        <%= for message <- @messages do %>
+          <li id={message.id}>
+            <strong>
+              <%!-- <%= message.sender_id %>: --%>
+            </strong>
+            <p><%= message.content %></p>
+          </li>
+        <% end %>
+        <%= for {id, content} <- @ongoing_messages do %>
+          <li id={id}>
+            <%!-- <strong><%= id %>:</strong> --%>
+            <p><%= content %></p>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <div>
+      <h2>New Message:</h2>
+      <.form :let={f} for={%{}} as={:input} phx-submit="new_message">
+        <MultiSelect.multi_select
+          id="some-id"
+          options={@available_bots}
+        />
+        <label for="content">Content:</label>
+        <input type="textarea" id="content" name="message[content]" required />
+        <input type="hidden" id="message_type" name="message[message_type]" value="human" required />
+        <.button type="submit">
+          Send
+        </.button>
+      </.form>
+    </div>
+
+    <div>
+      <a href={~p"/conversations"}>
+        Back to conversations
+      </a>
+    </div>
+
+    <.modal
+      :if={@live_action == :edit}
+      id="conversation-modal"
+      show
+      on_cancel={JS.patch(~p"/conversations/#{@conversation}")}
+    >
+      <div>
+        <.live_component
+          module={CapstoneWeb.ConversationLive.FormComponent}
+          id={@conversation.id}
+          title={@page_title}
+          action={@live_action}
+          conversation={@conversation}
+          patch={~p"/conversations/#{@conversation}"}
+        />
+      </div>
+    </.modal>
+    """
   end
 
   defp chat_module do
