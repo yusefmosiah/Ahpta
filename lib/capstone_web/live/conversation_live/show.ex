@@ -154,6 +154,15 @@ defmodule CapstoneWeb.ConversationLive.Show do
      |> assign(:summary, message.content)}
   end
 
+  def handle_info({ref, {:summary, message}}, socket) do
+    Logger.info("Summary (ref: #{ref}): #{inspect(message)}")
+
+    {:noreply,
+     socket
+     |> assign(:context, [message | get_context(socket.assigns.messages)])
+     |> assign(:summary, message.content)}
+  end
+
   def handle_info(message, socket) do
     Logger.info("Unhandled message: #{inspect(message)}")
     {:noreply, socket}
