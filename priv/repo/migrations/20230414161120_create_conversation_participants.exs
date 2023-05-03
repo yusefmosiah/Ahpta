@@ -6,7 +6,7 @@ defmodule Capstone.Repo.Migrations.CreateConversationParticipants do
       add :id, :binary_id, primary_key: true
       add :participant_type, :string
       add :owner_permission, :boolean, default: false, null: false
-      add :conversation_id, references(:conversations, on_delete: :nothing, type: :binary_id)
+      add :conversation_id, references(:conversations, on_delete: :delete_all, type: :binary_id)
       add :participant_id, references(:users, on_delete: :nothing, type: :binary_id)
 
       timestamps()

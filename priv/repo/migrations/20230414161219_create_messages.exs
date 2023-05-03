@@ -8,7 +8,7 @@ defmodule Capstone.Repo.Migrations.CreateMessages do
       add(:message_type, :string)
       add(:sender_id, references(:users, on_delete: :nothing, type: :binary_id), null: false)
 
-      add(:conversation_id, references(:conversations, on_delete: :nothing, type: :binary_id),
+      add(:conversation_id, references(:conversations, on_delete: :delete_all, type: :binary_id),
         null: false
       )
 

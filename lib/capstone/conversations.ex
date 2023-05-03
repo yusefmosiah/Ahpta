@@ -7,7 +7,6 @@ defmodule Capstone.Conversations do
   alias Capstone.Repo
 
   alias Capstone.Conversations.Conversation
-  alias Capstone.Messages.Message
   alias Capstone.Messages
 
   @doc """
