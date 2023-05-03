@@ -91,12 +91,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
         context = get_context(socket.assigns.messages) ++ [user_msg]
         summarize_if_needed(context)
 
-        Logger.info("111ccccontext: #{inspect(context)}")
-
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | context]
 
-          chat_module().create_chat_completion(messages, "gpt-3.5-turbo",
+          chat_module().create_chat_completion(messages, "gpt-4",
             stream: true,
             stream_to: self()
           )
@@ -148,10 +146,17 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   def handle_info({:summary, message}, socket) do
+    Logger.info("Summary: #{inspect(message)}")
+
     {:noreply,
      socket
      |> assign(:context, [message | get_context(socket.assigns.messages)])
      |> assign(:summary, message.content)}
+  end
+
+  def handle_info(message, socket) do
+    Logger.info("Unhandled message: #{inspect(message)}")
+    {:noreply, socket}
   end
 
   def handle_data(%{choices: [%{delta: %{content: content}}], id: id}, socket) do
@@ -245,10 +250,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
     ]
 
     Task.async(fn ->
-      Logger.info("!!!! in summarization task")
       {:ok, response} = chat_module().create_chat_completion(msgs, model)
-
-      send(self(), {:summary, response.choices |> List.first() |> Map.get(:message)})
+      summary = response.choices |> List.first() |> Map.get(:message)
+      Logger.info("$$$$ got summary: #{inspect(summary)}")
+      send(self(), {:summary, summary})
     end)
   end
 
