@@ -26,7 +26,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
         available_bots.availables_owned_by_user ++ available_bots.availables_not_owned_by_user
 
       bot_options =
-        available_bots |> Enum.with_index(fn bot, index -> %{id: index, label: bot.name} end)
+        available_bots
+        |> Enum.with_index(fn bot, index ->
+          %{id: index, label: bot.name, selected: bot in subscribed_bots}
+        end)
 
       {
         :ok,
@@ -95,12 +98,14 @@ defmodule CapstoneWeb.ConversationLive.Show do
       {:ok, message} ->
         user_msg = %{role: "user", content: message.content}
         context = get_context(socket.assigns.messages) ++ [user_msg]
+        #fixme - summarziation not getting called.
+        # how do i have a safe seed from which to begin recursive summarization?
         summarize_if_needed(context)
 
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | context]
 
-          chat_module().create_chat_completion(messages, "gpt-4",
+          chat_module().create_chat_completion(messages, "gpt-3.5-turbo",
             stream: true,
             stream_to: self()
           )
@@ -161,7 +166,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   def handle_info({ref, {:summary, message}}, socket) do
-    Logger.info("Summary (ref: #{ref}): #{inspect(message)}")
+    Logger.info("Summary (ref: #{inspect(ref)}): #{inspect(message)}")
 
     {:noreply,
      socket
@@ -260,7 +265,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   def summarize_if_needed(messages) do
-    if messages |> Enum.map(& &1.content) |> Enum.join("\n") |> byte_size() > 14000 do
+    if messages |> Enum.map(& &1.content) |> Enum.join("\n") |> String.length() > 9000 do
       summarize(messages)
     end
   end
@@ -292,10 +297,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
       <div class="container mx-auto max-w-screen-xl px-4">
         <div class="mx-auto px-2 py-6 dark:bg-black">
           <.header>
-            <h1 class="font-mono mb-6 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
-              Conversation <%= @conversation.id %>
-            </h1>
-            <h2>This is a conversation record from your database.</h2>
+            <p class="font-mono mb-6 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
+              <%= @conversation.topic %>
+            </p>
+
 
             <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()} class="inline-block">
               <.button class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400">
@@ -304,7 +309,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
             </.link>
           </.header>
 
-          <div class="rounded-lg bg-white bg-opacity-40 p-6 text-lg shadow-md backdrop-blur-md dark:bg-black dark:bg-opacity-50">
+          <div class="dark:text-white rounded-lg bg-white bg-opacity-40 p-6 text-lg shadow-md backdrop-blur-md dark:bg-black dark:bg-opacity-50">
             <h3>Summary</h3>
             <p class="space-y-2 whitespace-pre-wrap leading-relaxed text-gray-900 dark:text-gray-300">
               <%= @summary %>
@@ -357,6 +362,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
           form={f}
           on_change={fn opts -> send(self(), {:updated_options, opts}) end}
           placeholder="bots to send this message to..."
+          search_placeholder="search bots..."
           class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
         />
         <label for="content">Content:</label>
