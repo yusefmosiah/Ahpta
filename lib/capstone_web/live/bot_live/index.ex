@@ -105,8 +105,8 @@ defmodule CapstoneWeb.BotLive.Index do
 
         <div class="space-y-4">
           <%= for {id, bot} <- @streams.bots do %>
-            <.link navigate={~p"/bots/#{bot}"} class="block">
-              <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
+            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
+              <.link navigate={~p"/bots/#{bot}"} class="block">
                 <h2 class="mb-2 text-2xl font-bold">
                   <%= bot.name %>
                 </h2>
@@ -116,8 +116,23 @@ defmodule CapstoneWeb.BotLive.Index do
                 <p>
                   System Message: <%= bot.system_message %>
                 </p>
+              </.link>
+              <div class="mt-4 flex space-x-4">
+                <.link
+                  patch={~p"/bots/#{bot}/edit"}
+                  class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Edit
+                </.link>
+                <.link
+                  phx-click={JS.push("delete", value: %{id: bot.id}) |> hide("##{id}")}
+                  data-confirm="Are you sure?"
+                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                >
+                  Delete
+                </.link>
               </div>
-            </.link>
+            </div>
           <% end %>
         </div>
 

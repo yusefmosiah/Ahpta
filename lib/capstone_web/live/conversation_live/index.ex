@@ -63,7 +63,7 @@ defmodule CapstoneWeb.ConversationLive.Index do
         </div>
 
         <div class="space-y-4">
-          <%= for {_id, conversation} <- @streams.conversations do %>
+          <%= for {id, conversation} <- @streams.conversations do %>
             <.link navigate={~p"/conversations/#{conversation}"} class="block">
               <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
                 <h2 class="mb-2 text-2xl font-bold">
@@ -72,6 +72,21 @@ defmodule CapstoneWeb.ConversationLive.Index do
                 <p class="font-narrow text-gray-400">
                   Is published: <%= conversation.is_published %>
                 </p>
+                <div class="mt-4 flex space-x-4">
+                  <.link
+                    patch={~p"/conversations/#{conversation}/edit"}
+                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Edit
+                  </.link>
+                  <.link
+                    phx-click={JS.push("delete", value: %{id: conversation.id}) |> hide("##{id}")}
+                    data-confirm="Are you sure?"
+                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    Delete
+                  </.link>
+                </div>
               </div>
             </.link>
           <% end %>
