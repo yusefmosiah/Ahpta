@@ -233,8 +233,8 @@ defmodule AhptaWeb.ConversationLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-1/2 container mx-auto w-full px-4">
-      <div class="mx-auto px-2 py-6 dark:bg-black">
+    <div class="max-w-1/2 container mx-auto w-full">
+      <div class="mx-auto py-6 dark:bg-black">
         <.header>
           <p class="font-mono mb-6 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
             <%= @conversation.topic %>
