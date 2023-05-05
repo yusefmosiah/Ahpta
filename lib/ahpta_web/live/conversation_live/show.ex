@@ -233,7 +233,7 @@ defmodule AhptaWeb.ConversationLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-screen-xl px-4">
+    <div class="max-w-1/2 container mx-auto w-full px-4">
       <div class="mx-auto px-2 py-6 dark:bg-black">
         <.header>
           <p class="font-mono mb-6 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
@@ -276,18 +276,6 @@ defmodule AhptaWeb.ConversationLive.Show do
         <div>
           <h2>Messages:</h2>
           <ul id="message-list" phx-update="replace" class="space-y-4">
-            <%!-- <%= for message <- @messages do %>
-              <li
-                id={message.id}
-                class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50"
-              >
-                <strong></strong>
-                <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300">
-                  <%= message.content %>
-                </p>
-              </li>
-            <% end %> --%>
-
             <md-block :for={message <- @messages} class="mt-5 mb-5 block" id={Ecto.UUID.generate()}>
               <li
                 id={message.id}
@@ -299,14 +287,6 @@ defmodule AhptaWeb.ConversationLive.Show do
               </li>
             </md-block>
 
-            <%!-- <%= for {id, content} <- @ongoing_messages do %>
-              <li
-                id={id}
-                class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50"
-              >
-                <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300"><%= content %></p>
-              </li>
-            <% end %> --%>
             <md-block
               :for={{id, message} <- @ongoing_messages}
               class="mt-5 mb-5 block"
