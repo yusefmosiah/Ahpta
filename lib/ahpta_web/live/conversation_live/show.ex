@@ -276,7 +276,7 @@ defmodule AhptaWeb.ConversationLive.Show do
         <div>
           <h2>Messages:</h2>
           <ul id="message-list" phx-update="replace" class="space-y-4">
-            <%= for message <- @messages do %>
+            <%!-- <%= for message <- @messages do %>
               <li
                 id={message.id}
                 class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50"
@@ -286,15 +286,39 @@ defmodule AhptaWeb.ConversationLive.Show do
                   <%= message.content %>
                 </p>
               </li>
-            <% end %>
-            <%= for {id, content} <- @ongoing_messages do %>
+            <% end %> --%>
+
+            <md-block :for={message <- @messages} class="mt-5 mb-5 block" id={Ecto.UUID.generate()}>
+              <li
+                id={message.id}
+                class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50"
+              >
+                <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300">
+                  <%= message.content %>
+                </p>
+              </li>
+            </md-block>
+
+            <%!-- <%= for {id, content} <- @ongoing_messages do %>
               <li
                 id={id}
                 class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50"
               >
                 <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300"><%= content %></p>
               </li>
-            <% end %>
+            <% end %> --%>
+            <md-block
+              :for={{id, message} <- @ongoing_messages}
+              class="mt-5 mb-5 block"
+              id={Ecto.UUID.generate()}
+            >
+              <li
+                id={id}
+                class="transform rounded-lg bg-white bg-opacity-40 p-4 shadow-lg backdrop-blur-md transition-all hover:-translate-y-1 dark:border-2 dark:border-double dark:border-gray-700 dark:bg-black dark:bg-opacity-50"
+              >
+                <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300"><%= message %></p>
+              </li>
+            </md-block>
           </ul>
         </div>
         <div class="mt-6 space-y-4">
