@@ -24,7 +24,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
       |> assign(:dropdown_visible, false)
       |> assign(:subscribed_bots, [])
       |> assign(:context, get_context(conversation.messages))
-      |> assign(:summary, "")
 
     if connected?(socket) && user_token do
       user = Capstone.Accounts.get_user_by_session_token(user_token)
@@ -79,9 +78,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
       {:ok, message} ->
         user_msg = %{role: "user", content: message.content}
         context = get_context(socket.assigns.messages) ++ [user_msg]
-        # fixme - summarziation not getting called.
-        # how do i have a safe seed from which to begin recursive summarization?
-        summarize_if_needed(context)
 
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | context]
@@ -135,24 +131,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
      socket
      |> assign(:ongoing_messages, ongoing_messages)
      |> assign(:messages, socket.assigns.messages ++ [message.payload.bot_message])}
-  end
-
-  def handle_info({:summary, message}, socket) do
-    Logger.info("Summary: #{inspect(message)}")
-
-    {:noreply,
-     socket
-     |> assign(:context, [message | get_context(socket.assigns.messages)])
-     |> assign(:summary, message.content)}
-  end
-
-  def handle_info({ref, {:summary, message}}, socket) do
-    Logger.info("Summary (ref: #{inspect(ref)}): #{inspect(message)}")
-
-    {:noreply,
-     socket
-     |> assign(:context, [message | get_context(socket.assigns.messages)])
-     |> assign(:summary, message.content)}
   end
 
   def handle_info({:updated_options, options}, socket) do
@@ -265,33 +243,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
     |> elem(1)
   end
 
-  def summarize_if_needed(messages) do
-    if messages |> Enum.map(& &1.content) |> Enum.join("\n") |> String.length() > 9000 do
-      summarize(messages)
-    end
-  end
-
-  def summarize(context, model \\ "gpt-4") do
-    msgs = [
-      %{
-        role: "system",
-        content: """
-        Make a checkpoint (aka snapshot, summary) that consisely represents the content of the previous messages, possibly including a previous checkpoint.
-        Begin the checkpoint message with "Checkpoint:".
-        Remember, the checkpoint message will be included in the context of the next messages, and the user expects the chat to continue as though the context limit doesn't exist.
-        """
-      }
-      | context
-    ]
-
-    Task.async(fn ->
-      {:ok, response} = chat_module().create_chat_completion(msgs, model)
-      summary = response.choices |> List.first() |> Map.get(:message)
-      Logger.info("$$$$ got summary: #{inspect(summary)}")
-      send(self(), {:summary, summary})
-    end)
-  end
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -312,13 +263,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
             </.button>
           </.link>
         </.header>
-
-        <div class="rounded-lg bg-white bg-opacity-40 p-6 text-lg shadow-md backdrop-blur-md dark:bg-black dark:bg-opacity-50 dark:text-white">
-          <h3>Summary</h3>
-          <p class="space-y-2 whitespace-pre-wrap leading-relaxed text-gray-900 dark:text-gray-300">
-            <%= @summary %>
-          </p>
-        </div>
 
         <div class="mt-6 space-y-4">
           <h3>Subscribed Bots:</h3>

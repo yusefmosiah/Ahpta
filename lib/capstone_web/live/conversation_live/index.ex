@@ -64,12 +64,9 @@ defmodule CapstoneWeb.ConversationLive.Index do
 
         <div class="space-y-4">
           <%= for {_id, conversation} <- @streams.conversations do %>
-            <.link
-              navigate={~p"/conversations/#{conversation}"}
-              class="block"
-            >
+            <.link navigate={~p"/conversations/#{conversation}"} class="block">
               <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
-                <h2 class="text-2xl font-bold mb-2">
+                <h2 class="mb-2 text-2xl font-bold">
                   <%= conversation.topic %>
                 </h2>
                 <p class="font-narrow text-gray-400">
