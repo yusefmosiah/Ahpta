@@ -185,4 +185,16 @@ defmodule Capstone.Bots do
     participants = Repo.all(query)
     Enum.map(participants, & &1.bot)
   end
+
+  def merge_lists_by_id(base_list, list_to_merge) do
+    Enum.reduce(list_to_merge, base_list, fn new_map, acc ->
+      Enum.map(acc, fn
+        base_map when base_map.id == new_map.id and base_map.label == new_map.label ->
+          new_map
+
+        base_map ->
+          base_map
+      end)
+    end)
+  end
 end
