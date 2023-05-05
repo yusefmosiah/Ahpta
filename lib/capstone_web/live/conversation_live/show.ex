@@ -83,11 +83,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   end
 
   @impl true
-  def handle_event(
-        "new_message",
-        %{"message" => message_params, "multi" => _multi_params},
-        socket
-      ) do
+  def handle_event("new_message", %{"message" => message_params}, socket) do
     attrs =
       message_params
       |> Map.put("conversation_id", socket.assigns.conversation.id)
@@ -100,6 +96,8 @@ defmodule CapstoneWeb.ConversationLive.Show do
         # fixme - summarziation not getting called.
         # how do i have a safe seed from which to begin recursive summarization?
         summarize_if_needed(context)
+
+        IO.inspect(socket.assigns.subscribed_bots, label: "IIIIN create_message subscribed bots")
 
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | context]
@@ -173,47 +171,82 @@ defmodule CapstoneWeb.ConversationLive.Show do
      |> assign(:summary, message.content)}
   end
 
+  # def handle_info({:updated_options, options}, socket) do
+  #   Logger.info("Updated options: #{inspect(options)}")
+  #   IO.inspect(socket.assigns.bot_options, label: "socket.assigns.bot_options")
+
+  #   subscribed_bots =
+  #     for option <- options, option.selected do
+  #       bot = Bots.get_bot_by_name(option.label)
+  #       Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
+  #       bot
+  #     end
+
+  #   unsubscribed_bots =
+  #     for option <- options, !option.selected do
+  #       bot = Bots.get_bot_by_name(option.label)
+  #       Bots.unsubscribe_from_conversation(bot, socket.assigns.conversation)
+  #       bot
+  #     end
+  #     |> IO.inspect(label: "uuuuunsubscribed_bots")
+
+  #   subscribed_bot_options =
+  #     subscribed_bots
+  #     |> Enum.with_index(fn bot, index ->
+  #       %{id: index, label: bot.name, selected: true}
+  #     end)
+  #     |> IO.inspect(label: "sssssubscribed_bot_options")
+
+  #   unsubscribed_bot_options =
+  #     unsubscribed_bots
+  #     |> Enum.with_index(fn bot, index ->
+  #       %{id: index, label: bot.name, selected: false}
+  #     end)
+  #     |> IO.inspect(label: "uuuuunsubscribed_bot_options")
+
+  #   bot_options =
+  #     Bots.merge_lists_by_id(
+  #       socket.assigns.bot_options,
+  #       subscribed_bot_options
+  #     )
+  #     |> IO.inspect(label: "aaaaabot_options")
+  #     |> Bots.merge_lists_by_id(unsubscribed_bot_options)
+  #     |> IO.inspect(label: "bbbbbot_options")
+
+  #   {:noreply,
+  #    socket
+  #    |> assign(:subscribed_bots, subscribed_bots)
+  #    |> assign(:bot_options, bot_options)}
+  # end
+
   def handle_info({:updated_options, options}, socket) do
     Logger.info("Updated options: #{inspect(options)}")
     IO.inspect(socket.assigns.bot_options, label: "socket.assigns.bot_options")
 
-    subscribed_bots =
-      for option <- options, option.selected do
+    {subscribed_options, unsubscribed_options} = Enum.split_with(options, & &1.selected)
+
+    process_options = fn opts, is_subscribed ->
+      Enum.map(opts, fn option ->
         bot = Bots.get_bot_by_name(option.label)
-        Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
+
+        if is_subscribed do
+          Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
+        else
+          Bots.unsubscribe_from_conversation(bot, socket.assigns.conversation)
+        end
+
         bot
-      end
-
-    unsubscribed_bots =
-      for option <- options, !option.selected do
-        bot = Bots.get_bot_by_name(option.label)
-        Bots.unsubscribe_from_conversation(bot, socket.assigns.conversation)
-        bot
-      end
-      |> IO.inspect(label: "uuuuunsubscribed_bots")
-
-    subscribed_bot_options =
-      subscribed_bots
-      |> Enum.with_index(fn bot, index ->
-        %{id: index, label: bot.name, selected: true}
       end)
-      |> IO.inspect(label: "sssssubscribed_bot_options")
+    end
 
-    unsubscribed_bot_options =
-      unsubscribed_bots
-      |> Enum.with_index(fn bot, index ->
-        %{id: index, label: bot.name, selected: false}
-      end)
-      |> IO.inspect(label: "uuuuunsubscribed_bot_options")
+    subscribed_bots = process_options.(subscribed_options, true)
 
     bot_options =
-      Bots.merge_lists_by_id(
-        socket.assigns.bot_options,
-        subscribed_bot_options
-      )
-      |> IO.inspect(label: "aaaaabot_options")
-      |> Bots.merge_lists_by_id(unsubscribed_bot_options)
-      |> IO.inspect(label: "bbbbbot_options")
+      options
+      |> Enum.with_index()
+      |> Enum.map(fn {option, index} ->
+        %{id: index, label: option.label, selected: option.selected}
+      end)
 
     {:noreply,
      socket
