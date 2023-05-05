@@ -13,7 +13,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
     user_token = Map.get(session, "user_token")
 
     conversation = Conversations.get_conversation!(id)
-    subscribed_bots = Bots.list_subscribed_bots_for_conversation(conversation)
 
     if connected?(socket), do: CapstoneWeb.Endpoint.subscribe("convo:#{id}")
 
@@ -23,7 +22,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
       |> assign(:messages, conversation.messages)
       |> assign(:ongoing_messages, %{})
       |> assign(:dropdown_visible, false)
-      |> assign(:subscribed_bots, subscribed_bots)
+      |> assign(:subscribed_bots, [])
       |> assign(:context, get_context(conversation.messages))
       |> assign(:summary, "")
 
@@ -69,19 +68,6 @@ defmodule CapstoneWeb.ConversationLive.Show do
     {:noreply, update(socket, :dropdown_visible, &(!&1))}
   end
 
-  def handle_event("subscribe_bot", %{"bot_id" => bot_id}, socket) do
-    bot = Bots.get_bot!(bot_id)
-    conversation = socket.assigns.conversation
-
-    case Bots.subscribe_to_conversation(bot, conversation) do
-      {:ok, _} ->
-        {:noreply, assign(socket, :subscribed_bots, [bot | socket.assigns.subscribed_bots])}
-
-      {:error, :already_subscribed} ->
-        {:noreply, socket |> put_flash(:error, "Bot is already subscribed to this conversation")}
-    end
-  end
-
   @impl true
   def handle_event("new_message", %{"message" => message_params}, socket) do
     attrs =
@@ -97,12 +83,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
         # how do i have a safe seed from which to begin recursive summarization?
         summarize_if_needed(context)
 
-        IO.inspect(socket.assigns.subscribed_bots, label: "IIIIN create_message subscribed bots")
-
         for bot <- socket.assigns.subscribed_bots do
           messages = [%{role: "system", content: bot.system_message} | context]
 
-          chat_module().create_chat_completion(messages, "gpt-3.5-turbo",
+          chat_module().create_chat_completion(messages, "gpt-4",
             stream: true,
             stream_to: self()
           )
@@ -171,59 +155,10 @@ defmodule CapstoneWeb.ConversationLive.Show do
      |> assign(:summary, message.content)}
   end
 
-  # def handle_info({:updated_options, options}, socket) do
-  #   Logger.info("Updated options: #{inspect(options)}")
-  #   IO.inspect(socket.assigns.bot_options, label: "socket.assigns.bot_options")
-
-  #   subscribed_bots =
-  #     for option <- options, option.selected do
-  #       bot = Bots.get_bot_by_name(option.label)
-  #       Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
-  #       bot
-  #     end
-
-  #   unsubscribed_bots =
-  #     for option <- options, !option.selected do
-  #       bot = Bots.get_bot_by_name(option.label)
-  #       Bots.unsubscribe_from_conversation(bot, socket.assigns.conversation)
-  #       bot
-  #     end
-  #     |> IO.inspect(label: "uuuuunsubscribed_bots")
-
-  #   subscribed_bot_options =
-  #     subscribed_bots
-  #     |> Enum.with_index(fn bot, index ->
-  #       %{id: index, label: bot.name, selected: true}
-  #     end)
-  #     |> IO.inspect(label: "sssssubscribed_bot_options")
-
-  #   unsubscribed_bot_options =
-  #     unsubscribed_bots
-  #     |> Enum.with_index(fn bot, index ->
-  #       %{id: index, label: bot.name, selected: false}
-  #     end)
-  #     |> IO.inspect(label: "uuuuunsubscribed_bot_options")
-
-  #   bot_options =
-  #     Bots.merge_lists_by_id(
-  #       socket.assigns.bot_options,
-  #       subscribed_bot_options
-  #     )
-  #     |> IO.inspect(label: "aaaaabot_options")
-  #     |> Bots.merge_lists_by_id(unsubscribed_bot_options)
-  #     |> IO.inspect(label: "bbbbbot_options")
-
-  #   {:noreply,
-  #    socket
-  #    |> assign(:subscribed_bots, subscribed_bots)
-  #    |> assign(:bot_options, bot_options)}
-  # end
-
   def handle_info({:updated_options, options}, socket) do
     Logger.info("Updated options: #{inspect(options)}")
-    IO.inspect(socket.assigns.bot_options, label: "socket.assigns.bot_options")
 
-    {subscribed_options, unsubscribed_options} = Enum.split_with(options, & &1.selected)
+    subscribed_options = Enum.filter(options, & &1.selected)
 
     process_options = fn opts, is_subscribed ->
       Enum.map(opts, fn option ->
@@ -336,7 +271,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
     end
   end
 
-  def summarize(context, model \\ "gpt-3.5-turbo") do
+  def summarize(context, model \\ "gpt-4") do
     msgs = [
       %{
         role: "system",
