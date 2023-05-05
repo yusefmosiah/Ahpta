@@ -1,4 +1,7 @@
 defmodule Capstone.Accounts.User do
+  @moduledoc """
+  This module defines the `User` schema and its changesets.
+  """
   use Ecto.Schema
   import Ecto.Changeset
   @primary_key {:id, :binary_id, autogenerate: true}

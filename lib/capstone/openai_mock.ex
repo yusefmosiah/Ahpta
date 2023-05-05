@@ -1,4 +1,8 @@
 defmodule Capstone.OpenAIMock do
+  @moduledoc """
+  This module mokcs the ExOpenAI library which calls OpenAI's API.
+
+  """
   def create_chat_completion(_messages, _model) do
     {:ok,
      %{

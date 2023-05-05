@@ -136,36 +136,22 @@ defmodule CapstoneWeb.ConversationLive.Show do
   def handle_info({:updated_options, options}, socket) do
     Logger.info("Updated options: #{inspect(options)}")
 
-    subscribed_options = Enum.filter(options, & &1.selected)
-
-    process_options = fn opts, is_subscribed ->
-      Enum.map(opts, fn option ->
-        bot = Bots.get_bot_by_name(option.label)
-
-        if is_subscribed do
-          Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
-        else
-          Bots.unsubscribe_from_conversation(bot, socket.assigns.conversation)
-        end
-
-        bot
-      end)
+    subscribed_bots = for option <- options, option.selected do
+      bot = Bots.get_bot_by_name(option.label)
+      Bots.subscribe_to_conversation(bot, socket.assigns.conversation)
+      bot
     end
 
-    subscribed_bots = process_options.(subscribed_options, true)
-
-    bot_options =
-      options
-      |> Enum.with_index()
-      |> Enum.map(fn {option, index} ->
-        %{id: index, label: option.label, selected: option.selected}
-      end)
+    bot_options = Enum.map(options, fn %{label: label, selected: selected} = option ->
+      %{option | id: Enum.find_index(options, & &1.label == label), selected: selected}
+    end)
 
     {:noreply,
      socket
      |> assign(:subscribed_bots, subscribed_bots)
      |> assign(:bot_options, bot_options)}
   end
+
 
   def handle_info(message, socket) do
     Logger.info("Unhandled message: #{inspect(message)}")
@@ -227,7 +213,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
   defp page_title(:show), do: "Show Conversation"
   defp page_title(:edit), do: "Edit Conversation"
 
-  def get_context(messages, max_chars \\ 14000) do
+  def get_context(messages, max_chars \\ 14_000) do
     messages
     |> Enum.reverse()
     |> Messages.to_openai_format()

@@ -1,4 +1,7 @@
 defmodule CapstoneWeb.Telemetry do
+  @moduledoc """
+  Telemetry setup for CapstoneWeb.
+  """
   use Supervisor
   import Telemetry.Metrics
 

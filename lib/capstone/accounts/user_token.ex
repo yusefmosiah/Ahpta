@@ -1,4 +1,7 @@
 defmodule Capstone.Accounts.UserToken do
+  @moduledoc """
+  The UserToken context.
+  """
   use Ecto.Schema
   import Ecto.Query
   alias Capstone.Accounts.UserToken

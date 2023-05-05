@@ -1,4 +1,7 @@
 defmodule Capstone.Messages.Message do
+  @moduledoc """
+  The Schema and changeset for "message".
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

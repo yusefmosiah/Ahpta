@@ -1,4 +1,7 @@
 defmodule CapstoneWeb.UserAuth do
+  @moduledoc """
+  This module contains functions for logging in and out users.
+  """
   use CapstoneWeb, :verified_routes
 
   import Plug.Conn

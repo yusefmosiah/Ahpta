@@ -1,4 +1,7 @@
 defmodule Capstone.Bots.Bot do
+  @moduledoc """
+  The `Bot` schema.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

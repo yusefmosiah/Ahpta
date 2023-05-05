@@ -109,12 +109,10 @@ defmodule CapstoneWeb.ConversationLiveTest do
 
       assert_patch(show_live, ~p"/conversations/#{conversation}")
 
-      # test fails here. why?
-      # fixme
-      # html = render(show_live)
+      html = render(show_live)
 
-      # assert html =~ "Conversation updated successfully"
-      # assert html =~ "some updated topic"
+      assert html =~ "Conversation updated successfully"
+      assert html =~ "some updated topic"
     end
   end
 end

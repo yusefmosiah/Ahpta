@@ -1,4 +1,7 @@
 defmodule Capstone.Accounts.UserNotifier do
+  @moduledoc """
+  Sends emails to users.
+  """
   import Swoosh.Email
 
   alias Capstone.Mailer

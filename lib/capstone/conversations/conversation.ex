@@ -1,4 +1,7 @@
 defmodule Capstone.Conversations.Conversation do
+  @moduledoc """
+  The `Conversation` schema.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 
