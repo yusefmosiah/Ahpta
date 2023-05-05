@@ -382,7 +382,7 @@ defmodule CapstoneWeb.ConversationLive.Show do
               on_change={fn opts -> send(self(), {:updated_options, opts}) end}
               placeholder="bots to send this message to..."
               search_placeholder="search bots..."
-              class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-black dark:text-gray-100"
             />
             <label for="content">Content:</label>
             <input
