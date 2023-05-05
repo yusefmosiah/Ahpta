@@ -44,4 +44,90 @@ defmodule CapstoneWeb.ConversationLive.Index do
 
     {:noreply, stream_delete(socket, :conversations, conversation)}
   end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div class="container mx-auto max-w-screen-xl px-4">
+      <div class="mx-auto px-4 py-6 dark:bg-black">
+        <div class="mb-10 flex items-center justify-between">
+          <h1 class="mt-7 mb-6 text-5xl font-bold text-gray-900 dark:text-gray-100">Conversations</h1>
+          <span class="space-x-2">
+            <.link
+              patch={~p"/conversations/new"}
+              class="font-mono rounded-lg border-4 border-double border-green-400 bg-none p-4 text-green-500 hover:border-green-200 hover:bg-green-500 hover:text-white dark:border-green-400 dark:text-green-500 dark:hover:bg-green-700 dark:hover:text-white"
+            >
+              New Conversation
+            </.link>
+          </span>
+        </div>
+
+        <.table
+          id="conversations"
+          rows={@streams.conversations}
+          row_click={fn {_id, conversation} -> JS.navigate(~p"/conversations/#{conversation}") end}
+        >
+          <:col :let={{_id, conversation}} label="Topic">
+            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
+              <%= conversation.topic %>
+            </div>
+          </:col>
+          <:col :let={{_id, conversation}} label="Is published">
+            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
+              <%= conversation.is_published %>
+            </div>
+          </:col>
+          <:action :let={{_id, conversation}}>
+            <.link
+              patch={~p"/conversations/#{conversation}/edit"}
+              class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              Edit
+            </.link>
+          </:action>
+          <:action :let={{id, conversation}}>
+            <.link
+              phx-click={JS.push("delete", value: %{id: conversation.id}) |> hide("##{id}")}
+              data-confirm="Are you sure?"
+              class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Delete
+            </.link>
+          </:action>
+        </.table>
+
+        <div class="mt-6 mb-10 flex items-center justify-between">
+          <.link
+            navigate={~p"/conversations"}
+            class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400 dark:text-gray-400 dark:hover:border-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+          >
+            Convos
+          </.link>
+          <.link
+            navigate={~p"/bots"}
+            class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400 dark:text-gray-400 dark:hover:border-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+          >
+            Bots
+          </.link>
+        </div>
+
+        <.modal
+          :if={@live_action in [:new, :edit]}
+          id="conversation-modal"
+          show
+          on_cancel={JS.patch(~p"/conversations")}
+        >
+          <.live_component
+            module={CapstoneWeb.ConversationLive.FormComponent}
+            id={@conversation.id || :new}
+            title={@page_title}
+            action={@live_action}
+            conversation={@conversation}
+            patch={~p"/conversations"}
+          />
+        </.modal>
+      </div>
+    </div>
+    """
+  end
 end
