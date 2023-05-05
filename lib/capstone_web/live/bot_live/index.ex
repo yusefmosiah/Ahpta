@@ -105,7 +105,10 @@ defmodule CapstoneWeb.BotLive.Index do
 
         <div class="space-y-4">
           <%= for {id, bot} <- @streams.bots do %>
-            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
+            <div
+              class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white"
+              data-bot-id={bot.id}
+            >
               <.link navigate={~p"/bots/#{bot}"} class="block">
                 <h2 class="mb-2 text-2xl font-bold">
                   <%= bot.name %>

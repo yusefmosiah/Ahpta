@@ -46,41 +46,39 @@ defmodule CapstoneWeb.ConversationLiveTest do
       assert html =~ "some topic"
     end
 
-    # broken since moving from table to list
-    # test "updates conversation in listing", %{conn: conn, conversation: conversation} do
-    #   {:ok, index_live, _html} = live(conn, ~p"/conversations")
+    test "updates conversation in listing", %{conn: conn, conversation: conversation} do
+      {:ok, index_live, _html} = live(conn, ~p"/conversations")
 
-    #   assert index_live
-    #          |> element("#conversations-#{conversation.id} a", "Edit")
-    #          |> render_click() =~
-    #            "Edit Conversation"
+      assert index_live
+             |> element("a#edit-conversation-link-#{conversation.id}")
+             |> render_click() =~ "Edit Conversation"
 
-    #   assert_patch(index_live, ~p"/conversations/#{conversation}/edit")
+      assert_patch(index_live, ~p"/conversations/#{conversation}/edit")
 
-    #   assert index_live
-    #          |> form("#conversation-form", conversation: @invalid_attrs)
-    #          |> render_change() =~ "can&#39;t be blank"
+      assert index_live
+             |> form("#conversation-form", conversation: @invalid_attrs)
+             |> render_change() =~ "can&#39;t be blank"
 
-    #   assert index_live
-    #          |> form("#conversation-form", conversation: @update_attrs)
-    #          |> render_submit()
+      assert index_live
+             |> form("#conversation-form", conversation: @update_attrs)
+             |> render_submit()
 
-    #   assert_patch(index_live, ~p"/conversations")
+      assert_patch(index_live, ~p"/conversations")
 
-    #   html = render(index_live)
-    #   assert html =~ "Conversation updated successfully"
-    #   assert html =~ "some updated topic"
-    # end
+      html = render(index_live)
+      assert html =~ "Conversation updated successfully"
+      assert html =~ "some updated topic"
+    end
 
-    # test "deletes conversation in listing", %{conn: conn, conversation: conversation} do
-    #   {:ok, index_live, _html} = live(conn, ~p"/conversations")
+    test "deletes conversation in listing", %{conn: conn, conversation: conversation} do
+      {:ok, index_live, _html} = live(conn, ~p"/conversations")
 
-    #   assert index_live
-    #          |> element("#conversations-#{conversation.id} a", "Delete")
-    #          |> render_click()
+      assert index_live
+             |> element("a#delete-conversation-link-#{conversation.id}")
+             |> render_click()
 
-    #   refute has_element?(index_live, "#conversations-#{conversation.id}")
-    # end
+      refute has_element?(index_live, "[data-conversation-id='#{conversation.id}']")
+    end
   end
 
   describe "Show" do
@@ -118,20 +116,5 @@ defmodule CapstoneWeb.ConversationLiveTest do
       # assert html =~ "Conversation updated successfully"
       # assert html =~ "some updated topic"
     end
-
-    # test "subscribes a bot to the conversation", %{conn: conn, conversation: conversation} do
-    #   bot = bot_fixture()
-    #   # {:ok, conversation_participant} = Capstone.Bots.subscribe_to_conversation(bot, conversation)
-    #   user = user_fixture()
-    #   log_in_user(conn, user)
-
-    #   {:ok, show_live, _html} = live(conn, ~p"/conversations/#{conversation}")
-    #   # assert show_live |> element("button", "Select a bot") |> render_click()
-
-    #   # assert show_live |> element("button", bot.name) |> render_click()
-    #   assert show_live |> element("button", "Select a bot") |> render_click() =~ bot.name
-
-    #   # Add any necessary assertions to verify if the bot has been successfully subscribed.
-    # end
   end
 end
