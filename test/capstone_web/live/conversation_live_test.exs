@@ -1,8 +1,8 @@
-defmodule CapstoneWeb.ConversationLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.ConversationLiveTest do
+  use AhptaWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Capstone.ConversationsFixtures
+  import Ahpta.ConversationsFixtures
 
   @create_attrs %{is_published: true, topic: "some topic"}
   @update_attrs %{is_published: false, topic: "some updated topic"}

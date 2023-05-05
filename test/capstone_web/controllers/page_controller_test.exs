@@ -1,5 +1,5 @@
-defmodule CapstoneWeb.PageControllerTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.PageControllerTest do
+  use AhptaWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

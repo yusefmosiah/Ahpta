@@ -7,18 +7,18 @@
 # General application configuration
 import Config
 
-config :capstone,
-  ecto_repos: [Capstone.Repo],
+config :ahpta,
+  ecto_repos: [Ahpta.Repo],
   generators: [binary_id: true]
 
 # Configures the endpoint
-config :capstone, CapstoneWeb.Endpoint,
+config :ahpta, AhptaWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [html: CapstoneWeb.ErrorHTML, json: CapstoneWeb.ErrorJSON],
+    formats: [html: AhptaWeb.ErrorHTML, json: AhptaWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: Capstone.PubSub,
+  pubsub_server: Ahpta.PubSub,
   live_view: [signing_salt: "pk6XfiLc"]
 
 # Configures the mailer
@@ -28,9 +28,9 @@ config :capstone, CapstoneWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :capstone, Capstone.Mailer, adapter: Swoosh.Adapters.Local
+config :ahpta, Ahpta.Mailer, adapter: Swoosh.Adapters.Local
 
-config :capstone, :chat_module, ExOpenAI.Chat
+config :ahpta, :chat_module, ExOpenAI.Chat
 
 # Configure esbuild (the version is required)
 config :esbuild,

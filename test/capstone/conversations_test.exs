@@ -1,12 +1,12 @@
-defmodule Capstone.ConversationsTest do
-  use Capstone.DataCase
+defmodule Ahpta.ConversationsTest do
+  use Ahpta.DataCase
 
-  alias Capstone.Conversations
+  alias Ahpta.Conversations
 
   describe "conversations" do
-    alias Capstone.Conversations.Conversation
+    alias Ahpta.Conversations.Conversation
 
-    import Capstone.ConversationsFixtures
+    import Ahpta.ConversationsFixtures
 
     @invalid_attrs %{is_published: nil, topic: nil}
 
@@ -68,9 +68,9 @@ defmodule Capstone.ConversationsTest do
   end
 
   describe "conversation_participants" do
-    alias Capstone.Conversations.ConversationParticipant
+    alias Ahpta.Conversations.ConversationParticipant
 
-    import Capstone.ConversationsFixtures
+    import Ahpta.ConversationsFixtures
 
     @invalid_attrs %{owner_permission: nil, participant_type: nil}
 

@@ -1,8 +1,8 @@
-defmodule CapstoneWeb.UserRegistrationLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.UserRegistrationLiveTest do
+  use AhptaWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Capstone.AccountsFixtures
+  import Ahpta.AccountsFixtures
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do

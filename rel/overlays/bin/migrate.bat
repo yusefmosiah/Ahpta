@@ -1,1 +1,1 @@
-call "%~dp0\capstone" eval Capstone.Release.migrate
+call "%~dp0\ahpta" eval Ahpta.Release.migrate

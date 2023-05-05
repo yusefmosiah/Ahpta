@@ -1,7 +1,7 @@
-defmodule Capstone.MessagesFixtures do
+defmodule Ahpta.MessagesFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Capstone.Messages` context.
+  entities via the `Ahpta.Messages` context.
   """
 
   @doc """
@@ -16,7 +16,7 @@ defmodule Capstone.MessagesFixtures do
         conversation_id: Ecto.UUID.generate(),
         sender_id: Ecto.UUID.generate()
       })
-      |> Capstone.Messages.create_message()
+      |> Ahpta.Messages.create_message()
 
     message
   end

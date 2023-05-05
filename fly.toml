@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for capstone-stage on 2023-05-02T11:03:00-04:00
+# fly.toml app configuration file generated for ahpta-stage on 2023-05-02T11:03:00-04:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "capstone-stage"
+app = "ahpta-stage"
 kill_signal = "SIGTERM"
 kill_timeout = 5
 primary_region = "bos"
@@ -15,7 +15,7 @@ processes = []
   release_command = "/app/bin/migrate"
 
 [env]
-  PHX_HOST = "capstone-stage.fly.dev"
+  PHX_HOST = "ahpta-stage.fly.dev"
   PORT = "8080"
 
 [experimental]

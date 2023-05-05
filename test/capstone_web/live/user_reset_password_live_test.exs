@@ -1,10 +1,10 @@
-defmodule CapstoneWeb.UserResetPasswordLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.UserResetPasswordLiveTest do
+  use AhptaWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Capstone.AccountsFixtures
+  import Ahpta.AccountsFixtures
 
-  alias Capstone.Accounts
+  alias Ahpta.Accounts
 
   setup do
     user = user_fixture()

@@ -1,4 +1,4 @@
-defmodule Capstone.Repo.Migrations.CreateBots do
+defmodule Ahpta.Repo.Migrations.CreateBots do
   use Ecto.Migration
 
   def change do

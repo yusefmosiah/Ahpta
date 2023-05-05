@@ -1,4 +1,4 @@
-defmodule Capstone.Repo.Migrations.AddUniqueIndexToBotName do
+defmodule Ahpta.Repo.Migrations.AddUniqueIndexToBotName do
   use Ecto.Migration
 
   def change do

@@ -1,9 +1,9 @@
-defmodule Capstone.BotsTest do
-  use Capstone.DataCase
-  import Capstone.BotsFixtures
-  import Capstone.ConversationsFixtures
-  alias Capstone.Bots
-  alias Capstone.Conversations
+defmodule Ahpta.BotsTest do
+  use Ahpta.DataCase
+  import Ahpta.BotsFixtures
+  import Ahpta.ConversationsFixtures
+  alias Ahpta.Bots
+  alias Ahpta.Conversations
 
   setup do
     bot = bot_fixture()
@@ -12,7 +12,7 @@ defmodule Capstone.BotsTest do
   end
 
   describe "bots" do
-    alias Capstone.Bots.Bot
+    alias Ahpta.Bots.Bot
 
     @invalid_attrs %{is_available_for_rent: nil, name: nil}
 
@@ -60,8 +60,8 @@ defmodule Capstone.BotsTest do
   end
 
   describe "bots subscribing to conversations" do
-    alias Capstone.Bots.Bot
-    alias Capstone.Conversations.ConversationParticipant
+    alias Ahpta.Bots.Bot
+    alias Ahpta.Conversations.ConversationParticipant
 
     test "subscribe_to_conversation/2 with valid data subscribes the bot to the conversation",
          %{bot: bot, conversation: conversation} do

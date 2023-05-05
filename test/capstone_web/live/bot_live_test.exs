@@ -1,8 +1,8 @@
-defmodule CapstoneWeb.BotLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.BotLiveTest do
+  use AhptaWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Capstone.BotsFixtures
+  import Ahpta.BotsFixtures
 
   @update_attrs %{is_available_for_rent: false, name: "some updated name"}
   @invalid_attrs %{is_available_for_rent: false, name: nil}

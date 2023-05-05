@@ -1,4 +1,4 @@
-# Capstone
+# Ahpta
 
 To date, language models (AI that generates text) have been used in "1-player mode" — individual humans chatting with individual instances of a monolithic model.
 

@@ -1,15 +1,15 @@
-defmodule Capstone.MessagesTest do
-  use Capstone.DataCase
+defmodule Ahpta.MessagesTest do
+  use Ahpta.DataCase
 
-  alias Capstone.ConversationsFixtures
-  alias Capstone.Messages
-  alias Capstone.AccountsFixtures
-  alias Capstone.ConversationsFixtures
+  alias Ahpta.ConversationsFixtures
+  alias Ahpta.Messages
+  alias Ahpta.AccountsFixtures
+  alias Ahpta.ConversationsFixtures
 
   describe "messages" do
-    alias Capstone.Messages.Message
+    alias Ahpta.Messages.Message
 
-    import Capstone.MessagesFixtures
+    import Ahpta.MessagesFixtures
 
     @invalid_attrs %{content: nil, message_type: nil}
 

@@ -1,7 +1,7 @@
-defmodule Capstone.ConversationsFixtures do
+defmodule Ahpta.ConversationsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Capstone.Conversations` context.
+  entities via the `Ahpta.Conversations` context.
   """
 
   @doc """
@@ -14,7 +14,7 @@ defmodule Capstone.ConversationsFixtures do
         is_published: true,
         topic: "some topic"
       })
-      |> Capstone.Conversations.create_conversation()
+      |> Ahpta.Conversations.create_conversation()
 
     conversation
   end
@@ -30,7 +30,7 @@ defmodule Capstone.ConversationsFixtures do
         participant_type: "some participant_type",
         conversation_id: attrs.conversation_id
       })
-      |> Capstone.Conversations.create_conversation_participant()
+      |> Ahpta.Conversations.create_conversation_participant()
 
     conversation_participant
   end

@@ -8,25 +8,25 @@ config :bcrypt_elixir, :log_rounds, 1
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
-config :capstone, Capstone.Repo,
+config :ahpta, Ahpta.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "capstone_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "ahpta_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :capstone, CapstoneWeb.Endpoint,
+config :ahpta, AhptaWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "HeFtQ58OczJnqzwr55X7L1XMTbu5uYQvDqmrkbEsTfHd+34LDCiR208mwUawXK+y",
   server: false
 
 # In test we don't send emails.
-config :capstone, Capstone.Mailer, adapter: Swoosh.Adapters.Test
+config :ahpta, Ahpta.Mailer, adapter: Swoosh.Adapters.Test
 
-config :capstone, :chat_module, Capstone.OpenAIMock
+config :ahpta, :chat_module, Ahpta.OpenAIMock
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

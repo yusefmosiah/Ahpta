@@ -1,4 +1,4 @@
-defmodule Capstone.Repo.Migrations.AlterConversationParticipant do
+defmodule Ahpta.Repo.Migrations.AlterConversationParticipant do
   use Ecto.Migration
 
   def change do

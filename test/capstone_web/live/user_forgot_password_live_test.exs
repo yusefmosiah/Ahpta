@@ -1,11 +1,11 @@
-defmodule CapstoneWeb.UserForgotPasswordLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.UserForgotPasswordLiveTest do
+  use AhptaWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Capstone.AccountsFixtures
+  import Ahpta.AccountsFixtures
 
-  alias Capstone.Accounts
-  alias Capstone.Repo
+  alias Ahpta.Accounts
+  alias Ahpta.Repo
 
   describe "Forgot password page" do
     test "renders email page", %{conn: conn} do

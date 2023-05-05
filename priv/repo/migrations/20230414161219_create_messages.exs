@@ -1,4 +1,4 @@
-defmodule Capstone.Repo.Migrations.CreateMessages do
+defmodule Ahpta.Repo.Migrations.CreateMessages do
   use Ecto.Migration
 
   def change do

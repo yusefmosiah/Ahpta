@@ -1,11 +1,11 @@
-defmodule CapstoneWeb.UserConfirmationInstructionsLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.UserConfirmationInstructionsLiveTest do
+  use AhptaWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Capstone.AccountsFixtures
+  import Ahpta.AccountsFixtures
 
-  alias Capstone.Accounts
-  alias Capstone.Repo
+  alias Ahpta.Accounts
+  alias Ahpta.Repo
 
   setup do
     %{user: user_fixture()}

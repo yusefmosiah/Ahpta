@@ -1,9 +1,9 @@
-defmodule CapstoneWeb.UserSettingsLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.UserSettingsLiveTest do
+  use AhptaWeb.ConnCase
 
-  alias Capstone.Accounts
+  alias Ahpta.Accounts
   import Phoenix.LiveViewTest
-  import Capstone.AccountsFixtures
+  import Ahpta.AccountsFixtures
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do

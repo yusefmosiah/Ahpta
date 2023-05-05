@@ -1,10 +1,10 @@
-defmodule Capstone.AccountsTest do
-  use Capstone.DataCase
+defmodule Ahpta.AccountsTest do
+  use Ahpta.DataCase
 
-  alias Capstone.Accounts
+  alias Ahpta.Accounts
 
-  import Capstone.AccountsFixtures
-  alias Capstone.Accounts.{User, UserToken}
+  import Ahpta.AccountsFixtures
+  alias Ahpta.Accounts.{User, UserToken}
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do

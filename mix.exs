@@ -1,9 +1,9 @@
-defmodule Capstone.MixProject do
+defmodule Ahpta.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :capstone,
+      app: :ahpta,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule Capstone.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Capstone.Application, []},
+      mod: {Ahpta.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -55,7 +55,8 @@ defmodule Capstone.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false},
       {:tailwind_formatter, "~> 0.3.5", only: :dev, runtime: false},
-      {:phoenix_multi_select, "~> 0.1"}
+      {:phoenix_multi_select, "~> 0.1"},
+      {:rename, "~> 0.1.0", only: :dev}
     ]
   end
 

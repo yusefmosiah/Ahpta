@@ -1,4 +1,4 @@
-defmodule Capstone.Repo.Migrations.CreateUsersAuthTables do
+defmodule Ahpta.Repo.Migrations.CreateUsersAuthTables do
   use Ecto.Migration
 
   def change do

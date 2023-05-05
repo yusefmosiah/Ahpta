@@ -1,8 +1,8 @@
-defmodule CapstoneWeb.UserLoginLiveTest do
-  use CapstoneWeb.ConnCase
+defmodule AhptaWeb.UserLoginLiveTest do
+  use AhptaWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Capstone.AccountsFixtures
+  import Ahpta.AccountsFixtures
 
   describe "Log in page" do
     test "renders log in page", %{conn: conn} do

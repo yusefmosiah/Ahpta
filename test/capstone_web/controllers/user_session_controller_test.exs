@@ -1,7 +1,7 @@
-defmodule CapstoneWeb.UserSessionControllerTest do
-  use CapstoneWeb.ConnCase, async: true
+defmodule AhptaWeb.UserSessionControllerTest do
+  use AhptaWeb.ConnCase, async: true
 
-  import Capstone.AccountsFixtures
+  import Ahpta.AccountsFixtures
 
   setup do
     %{user: user_fixture()}
@@ -35,7 +35,7 @@ defmodule CapstoneWeb.UserSessionControllerTest do
           }
         })
 
-      assert conn.resp_cookies["_capstone_web_user_remember_me"]
+      assert conn.resp_cookies["_ahpta_web_user_remember_me"]
       assert redirected_to(conn) == ~p"/"
     end
 

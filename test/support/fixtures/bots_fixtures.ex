@@ -1,7 +1,7 @@
-defmodule Capstone.BotsFixtures do
+defmodule Ahpta.BotsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Capstone.Bots` context.
+  entities via the `Ahpta.Bots` context.
   """
 
   @doc """
@@ -15,7 +15,7 @@ defmodule Capstone.BotsFixtures do
         name: "some name",
         system_message: "some system message"
       })
-      |> Capstone.Bots.create_bot()
+      |> Ahpta.Bots.create_bot()
 
     bot
   end
