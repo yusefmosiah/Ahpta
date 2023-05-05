@@ -46,7 +46,7 @@ defmodule CapstoneWeb.BotLiveTest do
       assert html =~ "unique name"
     end
 
-    #broken since moving from table to list
+    # broken since moving from table to list
     # test "updates bot in listing", %{conn: conn, bot: bot} do
     #   {:ok, index_live, _html} = live(conn, ~p"/bots")
 
