@@ -62,39 +62,23 @@ defmodule CapstoneWeb.ConversationLive.Index do
           </span>
         </div>
 
-        <.table
-          id="conversations"
-          rows={@streams.conversations}
-          row_click={fn {_id, conversation} -> JS.navigate(~p"/conversations/#{conversation}") end}
-        >
-          <:col :let={{_id, conversation}} label="Topic">
-            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
-              <%= conversation.topic %>
-            </div>
-          </:col>
-          <:col :let={{_id, conversation}} label="Is published">
-            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
-              <%= conversation.is_published %>
-            </div>
-          </:col>
-          <:action :let={{_id, conversation}}>
+        <div class="space-y-4">
+          <%= for {_id, conversation} <- @streams.conversations do %>
             <.link
-              patch={~p"/conversations/#{conversation}/edit"}
-              class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              navigate={~p"/conversations/#{conversation}"}
+              class="block"
             >
-              Edit
+              <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
+                <h2 class="text-2xl font-bold mb-2">
+                  <%= conversation.topic %>
+                </h2>
+                <p class="font-narrow text-gray-400">
+                  Is published: <%= conversation.is_published %>
+                </p>
+              </div>
             </.link>
-          </:action>
-          <:action :let={{id, conversation}}>
-            <.link
-              phx-click={JS.push("delete", value: %{id: conversation.id}) |> hide("##{id}")}
-              data-confirm="Are you sure?"
-              class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            >
-              Delete
-            </.link>
-          </:action>
-        </.table>
+          <% end %>
+        </div>
 
         <div class="mt-6 mb-10 flex items-center justify-between">
           <.link

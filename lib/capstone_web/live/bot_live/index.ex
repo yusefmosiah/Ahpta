@@ -103,46 +103,26 @@ defmodule CapstoneWeb.BotLive.Index do
           </span>
         </div>
 
-        <.table
-          id="bots"
-          rows={@streams.bots}
-          row_click={fn {_id, bot} -> JS.navigate(~p"/bots/#{bot}") end}
-        >
-          <:col :let={{_id, bot}} label="Name">
-            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75">
-              <h2 class="font-mono text-4xl font-semibold text-purple-900 dark:text-purple-300">
-                <.link navigate={~p"/bots/#{bot}"}><%= bot.name %></.link>
-              </h2>
-            </div>
-          </:col>
-          <:col :let={{_id, bot}} label="Is available for rent">
-            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
-              <%= bot.is_available_for_rent %>
-            </div>
-          </:col>
-          <:col :let={{_id, bot}} label="System Message">
-            <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
-              <%= bot.system_message %>
-            </div>
-          </:col>
-          <:action :let={{_id, bot}}>
+        <div class="space-y-4">
+          <%= for {id, bot} <- @streams.bots do %>
             <.link
-              patch={~p"/bots/#{bot}/edit"}
-              class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              navigate={~p"/bots/#{bot}"}
+              class="block"
             >
-              Edit
+              <div class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white">
+                <h2 class="text-2xl font-bold mb-2">
+                  <%= bot.name %>
+                </h2>
+                <p>
+                  Is available for rent: <%= bot.is_available_for_rent %>
+                </p>
+                <p>
+                  System Message: <%= bot.system_message %>
+                </p>
+              </div>
             </.link>
-          </:action>
-          <:action :let={{id, bot}}>
-            <.link
-              phx-click={JS.push("delete", value: %{id: bot.id}) |> hide("##{id}")}
-              data-confirm="Are you sure?"
-              class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            >
-              Delete
-            </.link>
-          </:action>
-        </.table>
+          <% end %>
+        </div>
 
         <div class="mt-6 mb-10 flex items-center justify-between">
           <.link
@@ -158,6 +138,7 @@ defmodule CapstoneWeb.BotLive.Index do
             Bots
           </.link>
         </div>
+
         <.modal
           :if={@live_action in [:new, :edit]}
           id="bot-modal"
@@ -177,4 +158,5 @@ defmodule CapstoneWeb.BotLive.Index do
     </div>
     """
   end
+
 end
