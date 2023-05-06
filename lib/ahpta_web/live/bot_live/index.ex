@@ -154,7 +154,7 @@ defmodule AhptaWeb.BotLive.Index do
           </.link>
         </div>
 
-        <.modal
+        <.dark_modal
           :if={@live_action in [:new, :edit]}
           id="bot-modal"
           show
@@ -168,7 +168,7 @@ defmodule AhptaWeb.BotLive.Index do
             bot={@bot}
             patch={~p"/bots"}
           />
-        </.modal>
+        </.dark_modal>
       </div>
     </div>
     """

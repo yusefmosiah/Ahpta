@@ -51,13 +51,13 @@ defmodule AhptaWeb.ConversationLive.Index do
     <div class="container mx-auto max-w-screen-xl px-4">
       <div class="mx-auto px-4 py-6 dark:bg-black">
         <div class="mb-10 flex items-center justify-between">
-          <h1 class="mt-7 mb-6 text-5xl font-bold text-gray-900 dark:text-gray-100">Conversations</h1>
+          <h1 class="mt-7 mb-6 text-5xl font-bold text-gray-900 dark:text-gray-100">Convos</h1>
           <span class="space-x-2">
             <.link
               patch={~p"/conversations/new"}
               class="font-mono rounded-lg border-4 border-double border-green-400 bg-none p-4 text-green-500 hover:border-green-200 hover:bg-green-500 hover:text-white dark:border-green-400 dark:text-green-500 dark:hover:bg-green-700 dark:hover:text-white"
             >
-              New Conversation
+              new
             </.link>
           </span>
         </div>
