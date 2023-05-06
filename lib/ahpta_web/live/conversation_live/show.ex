@@ -3,6 +3,7 @@ defmodule AhptaWeb.ConversationLive.Show do
   use AhptaWeb, :live_view
   use ExOpenAI.StreamingClient
 
+  alias AhptaWeb.MessageLive
   alias Ahpta.Conversations
   alias Ahpta.Bots
   alias Ahpta.Messages
@@ -246,35 +247,15 @@ defmodule AhptaWeb.ConversationLive.Show do
             class="inline-block"
           >
             <.button class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400">
-              Edit conversation
+              Edit convo
             </.button>
           </.link>
         </.header>
 
-        <div class="mt-6 space-y-4">
-          <h3>Subscribed Bots:</h3>
-          <ul>
-            <%= for bot <- @subscribed_bots do %>
-              <li class="whitespace-pre-wrap text-gray-900 dark:text-gray-300">
-                <%= bot.name %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
 
-        <div class="mt-6 space-y-4">
-          <h3>Topic:</h3>
-          <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300">
-            <%= @conversation.topic %>
-          </p>
-          <h3>Is published:</h3>
-          <p class="whitespace-pre-wrap text-gray-900 dark:text-gray-300">
-            <%= @conversation.is_published %>
-          </p>
-        </div>
 
         <div>
-          <h2>Messages:</h2>
+
           <ul id="message-list" phx-update="replace" class="space-y-4">
             <md-block :for={message <- @messages} class="mt-5 mb-5 block" id={Ecto.UUID.generate()}>
               <li
@@ -301,15 +282,9 @@ defmodule AhptaWeb.ConversationLive.Show do
             </md-block>
           </ul>
         </div>
-        <div class="mt-6 space-y-4">
-          <h2>New Message:</h2>
-          <.form
-            :let={f}
-            for={%{}}
-            as={:input}
-            phx-submit="new_message"
-            class="mt-10 flex items-center"
-          >
+        <div class="mt-6 space-y-4 dark:text-white">
+
+          <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="mt-10">
             <MultiSelect.multi_select
               id="multi"
               options={@bot_options}
@@ -319,15 +294,17 @@ defmodule AhptaWeb.ConversationLive.Show do
               search_placeholder="search bots..."
               class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-black dark:text-gray-100"
             />
-            <label for="content">Content:</label>
-            <input
+
+            <.input
               type="textarea"
               id="content"
               name="message[content]"
+              placeholder="message content..."
+              value=""
               required
-              class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              class="autoresize mt-4 w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             />
-            <input
+            <.input
               type="hidden"
               id="message_type"
               name="message[message_type]"
@@ -336,7 +313,7 @@ defmodule AhptaWeb.ConversationLive.Show do
             />
             <.button
               type="submit"
-              class="font-mono ml-2 rounded rounded-md border-4 border-double border-blue-400 bg-none p-1.5 py-4 text-blue-500 hover:border-blue-200 hover:bg-blue-500 hover:text-white dark:hover:border-blue-200 dark:hover:text-white"
+              class="font-mono mt-4 ml-2 rounded-md border-4 border-double border-blue-400 bg-none p-1.5 py-4 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200 text-blue-400"
             >
               Send
             </.button>

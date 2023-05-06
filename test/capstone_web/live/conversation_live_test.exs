@@ -26,7 +26,7 @@ defmodule AhptaWeb.ConversationLiveTest do
     test "saves new conversation", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/conversations")
 
-      assert index_live |> element("a", "New Conversation") |> render_click() =~
+      assert index_live |> element("a", "new") |> render_click() =~
                "New Conversation"
 
       assert_patch(index_live, ~p"/conversations/new")

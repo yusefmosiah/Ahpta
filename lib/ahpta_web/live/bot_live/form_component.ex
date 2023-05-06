@@ -9,7 +9,9 @@ defmodule AhptaWeb.BotLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle><p class="text-white">Use this form to manage bot records in your database.</p></:subtitle>
+        <:subtitle>
+          <p class="text-white">Use this form to manage bot records in your database.</p>
+        </:subtitle>
       </.header>
 
       <.simple_form
@@ -19,14 +21,13 @@ defmodule AhptaWeb.BotLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-       <.input field={@form[:name]} type="text" label="Name" />
+        <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:system_message]} type="textarea" label="System Message" />
         <.input field={@form[:is_available_for_rent]} type="checkbox" label="Is available for rent" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Bot</.button>
         </:actions>
       </.simple_form>
-
     </div>
     """
   end
