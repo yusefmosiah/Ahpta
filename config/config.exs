@@ -32,6 +32,12 @@ config :ahpta, Ahpta.Mailer, adapter: Swoosh.Adapters.Local
 
 config :ahpta, :chat_module, ExOpenAI.Chat
 
+config :qdrant,
+port: 6333,
+interface: "rest",
+database_url: System.get_env("QDRANT_DATABASE_URL"),
+api_key: System.get_env("QDRANT_API_KEY")
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

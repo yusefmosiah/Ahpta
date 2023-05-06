@@ -53,10 +53,9 @@ defmodule Ahpta.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:ex_openai, "~> 1.1.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.28", only: :dev, runtime: false},
       {:tailwind_formatter, "~> 0.3.5", only: :dev, runtime: false},
       {:phoenix_multi_select, "~> 0.1"},
-      {:rename, "~> 0.1.0", only: :dev}
+      {:qdrant, git: "git@github.com:marinac-dev/qdrant.git"}
     ]
   end
 
