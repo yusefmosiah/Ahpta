@@ -3,7 +3,6 @@ defmodule AhptaWeb.ConversationLive.Show do
   use AhptaWeb, :live_view
   use ExOpenAI.StreamingClient
 
-  alias AhptaWeb.MessageLive
   alias Ahpta.Conversations
   alias Ahpta.Bots
   alias Ahpta.Messages
