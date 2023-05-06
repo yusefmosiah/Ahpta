@@ -80,7 +80,7 @@ defmodule AhptaWeb.ConversationLive.Show do
         context = get_context(socket.assigns.messages) ++ [user_msg]
 
         for bot <- socket.assigns.subscribed_bots do
-          messages = [%{role: "system", content: bot.system_message} | context]
+          messages = context ++ [%{role: "assistant", content: bot.system_message}]
 
           chat_module().create_chat_completion(messages, "gpt-4",
             stream: true,
