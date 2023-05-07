@@ -7,6 +7,8 @@ defmodule Ahpta.Messages do
   alias Ahpta.Repo
 
   alias Ahpta.Messages.Message
+  alias ExOpenAI.Embeddings
+  alias Qdrant.Api.Http.Points
 
   @doc """
   Returns the list of messages.
@@ -42,6 +44,11 @@ defmodule Ahpta.Messages do
 
   """
   def get_message!(id), do: Repo.get!(Message, id) |> Repo.preload([:sender, :conversation])
+
+  def get_messages_from_ids(ids) do
+    query = from(m in Message, where: m.id in ^ids)
+    Repo.all(query)
+  end
 
   @doc """
   Creates a message.
@@ -116,5 +123,76 @@ defmodule Ahpta.Messages do
       %Ahpta.Messages.Message{content: content, message_type: "human"} ->
         %{content: content, role: "user"}
     end)
+  end
+
+  def get_embeddings(content) do
+    case Embeddings.create_embedding(content, "text-embedding-ada-002") do
+      {:ok, %{data: [%{embedding: embedding}]}} -> {:ok, embedding}
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  def search_qdrant(embedding) do
+    case Points.search_points("ahpta", %{vector: embedding, limit: 10, with_payload: true}) do
+      {:ok, %{body: %{"result" => search_results}}} -> {:ok, search_results}
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  def augment_user_msg(user_msg, search_results) do
+    # Modify user_msg based on search_results as needed
+    {user_msg, search_results}
+  end
+
+  def handle_tasks(message) do
+    with {:ok, embedding} <- get_embeddings(message.content),
+         {:ok, search_results} <- search_qdrant(embedding) do
+      {:ok, augment_user_msg(message, search_results)}
+    else
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  def upsert_bot_task(embedding, bot_message) do
+    Qdrant.upsert_point("ahpta", %{
+      points: [
+        %{
+          id: bot_message.id,
+          vector: embedding,
+          payload: %{
+            message_type: "bot",
+            content: bot_message.content,
+            sender_id: bot_message.sender_id,
+            conversation_id: bot_message.conversation_id
+          }
+        }
+      ]
+    })
+  end
+
+  def perform_bot_tasks(message_attrs) do
+    with {:ok, bot_message} <- create_message(message_attrs),
+         {:ok, embedding} <- get_embeddings(bot_message.content),
+         {:ok, _upsert_response} <- upsert_bot_task(embedding, bot_message) do
+      {:ok, bot_message}
+    else
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  def get_context(messages, max_chars \\ 14_000) do
+    messages
+    |> Enum.reverse()
+    |> to_openai_format()
+    |> Enum.reduce_while({0, []}, fn message, {sum, result} ->
+      content_length = byte_size(message.content)
+
+      if sum + content_length <= max_chars do
+        {:cont, {sum + content_length, [message | result]}}
+      else
+        {:halt, {sum, result}}
+      end
+    end)
+    |> elem(1)
   end
 end

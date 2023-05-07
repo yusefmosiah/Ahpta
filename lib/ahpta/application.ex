@@ -17,9 +17,9 @@ defmodule Ahpta.Application do
       # Start Finch
       {Finch, name: Ahpta.Finch},
       # Start the Endpoint (http/https)
-      AhptaWeb.Endpoint
-      # Start a worker by calling: Ahpta.Worker.start_link(arg)
-      # {Ahpta.Worker, arg}
+      AhptaWeb.Endpoint,
+      # Start task supervisor
+      {Task.Supervisor, name: Ahpta.TaskSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

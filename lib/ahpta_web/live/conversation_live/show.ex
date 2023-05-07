@@ -23,7 +23,8 @@ defmodule AhptaWeb.ConversationLive.Show do
       |> assign(:ongoing_messages, %{})
       |> assign(:dropdown_visible, false)
       |> assign(:subscribed_bots, [])
-      |> assign(:context, get_context(conversation.messages))
+      |> assign(:context, Messages.get_context(conversation.messages))
+      |> assign(:linked_messages, [])
 
     if connected?(socket) && user_token do
       user = Ahpta.Accounts.get_user_by_session_token(user_token)
@@ -74,10 +75,36 @@ defmodule AhptaWeb.ConversationLive.Show do
       |> Map.put("conversation_id", socket.assigns.conversation.id)
       |> Map.put("sender_id", socket.assigns.current_user.id)
 
-    case Ahpta.Messages.create_message(attrs) do
+    # refactor the body of this code to messages context
+    case Messages.create_message(attrs) do
       {:ok, message} ->
-        user_msg = %{role: "user", content: message.content}
-        context = get_context(socket.assigns.messages) ++ [user_msg]
+        task_ref =
+          Task.Supervisor.async_nolink(Ahpta.TaskSupervisor, fn ->
+            Messages.handle_tasks(message)
+          end)
+
+        # fixme rename augmented prompt
+        {:ok, {_usr_msg, augmented_prompt}} = Task.await(task_ref)
+
+        ids = Enum.map(augmented_prompt, & &1["id"])
+
+        linked_messages =
+          Messages.get_messages_from_ids(ids)
+          |> IO.inspect(label: "linked_messages")
+
+        linked_messages_content =
+          linked_messages
+          |> Enum.map_join("\n\n", & &1.content)
+          |> IO.inspect(label: "linked_messages_content")
+
+        user_msg_content =
+          "SIMILAR MESSAGES:\n#{linked_messages_content}\n\nUSER MESSAGE:\n#{message.content}"
+
+        user_msg = %{role: "user", content: user_msg_content}
+
+        # refactor above into messages context
+
+        context = Messages.get_context(socket.assigns.messages) ++ [user_msg]
 
         for bot <- socket.assigns.subscribed_bots do
           messages = context ++ [%{role: "assistant", content: bot.system_message}]
@@ -97,7 +124,8 @@ defmodule AhptaWeb.ConversationLive.Show do
 
         {:noreply,
          socket
-         |> assign(:messages, socket.assigns.messages ++ [message])}
+         |> assign(:messages, socket.assigns.messages ++ [message])
+         |> assign(:linked_messages, linked_messages)}
 
       {:error, reason} ->
         Logger.error("Error creating message: #{inspect(reason)}")
@@ -183,13 +211,22 @@ defmodule AhptaWeb.ConversationLive.Show do
       "message_type" => "bot"
     }
 
-    {:ok, bot_message} = Ahpta.Messages.create_message(attrs)
+    task_ref =
+      Task.Supervisor.async_nolink(Ahpta.TaskSupervisor, fn ->
+        Messages.perform_bot_tasks(attrs)
+      end)
 
-    AhptaWeb.Endpoint.broadcast(
-      "convo:#{socket.assigns.conversation.id}",
-      "finished_streaming",
-      %{bot_message: bot_message, id: id}
-    )
+    case Task.await(task_ref, 5000) do
+      {:ok, bot_message} ->
+        AhptaWeb.Endpoint.broadcast(
+          "convo:#{socket.assigns.conversation.id}",
+          "finished_streaming",
+          %{bot_message: bot_message, id: id}
+        )
+
+      {:error, reason} ->
+        Logger.error("Error creating message: #{inspect(reason)}")
+    end
 
     {:noreply, socket}
   end
@@ -214,22 +251,6 @@ defmodule AhptaWeb.ConversationLive.Show do
   defp page_title(:show), do: "Show Conversation"
   defp page_title(:edit), do: "Edit Conversation"
 
-  def get_context(messages, max_chars \\ 14_000) do
-    messages
-    |> Enum.reverse()
-    |> Messages.to_openai_format()
-    |> Enum.reduce_while({0, []}, fn message, {sum, result} ->
-      content_length = byte_size(message.content)
-
-      if sum + content_length <= max_chars do
-        {:cont, {sum + content_length, [message | result]}}
-      else
-        {:halt, {sum, result}}
-      end
-    end)
-    |> elem(1)
-  end
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -251,10 +272,7 @@ defmodule AhptaWeb.ConversationLive.Show do
           </.link>
         </.header>
 
-
-
         <div>
-
           <ul id="message-list" phx-update="replace" class="space-y-4">
             <md-block :for={message <- @messages} class="mt-5 mb-5 block" id={Ecto.UUID.generate()}>
               <li
@@ -282,7 +300,6 @@ defmodule AhptaWeb.ConversationLive.Show do
           </ul>
         </div>
         <div class="mt-6 space-y-4 dark:text-white">
-
           <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="mt-10">
             <MultiSelect.multi_select
               id="multi"
@@ -312,7 +329,7 @@ defmodule AhptaWeb.ConversationLive.Show do
             />
             <.button
               type="submit"
-              class="font-mono mt-4 ml-2 rounded-md border-4 border-double border-blue-400 bg-none p-1.5 py-4 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200 text-blue-400"
+              class="font-mono mt-4 ml-2 rounded-md border-4 border-double border-blue-400 bg-none p-1.5 py-4 text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
             >
               Send
             </.button>
