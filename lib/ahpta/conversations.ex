@@ -251,7 +251,7 @@ defmodule Ahpta.Conversations do
   @doc """
   gets convo and messages
   """
-  #fixme: delete
+  # fixme: delete
   ## deaad code
   def get_conversation_and_messages(conversation_id) do
     with {:ok, conversation} <- get_conversation(conversation_id),

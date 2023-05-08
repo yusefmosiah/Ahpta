@@ -3,3 +3,7 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+.message-container {
+    height: calc(88vh - 10rem); /* Adjust this value according to your desired height */
+    overflow-y: scroll;
+  }

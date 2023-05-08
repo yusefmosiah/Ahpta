@@ -258,9 +258,9 @@ defmodule AhptaWeb.ConversationLive.Show do
   def render(assigns) do
     ~H"""
     <div class="max-w-1/2 container mx-auto w-full">
-      <div class="mx-auto py-6 dark:bg-black">
+      <div class="mx-auto dark:bg-black">
         <.header>
-          <p class="font-mono mb-6 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
+          <p class="font-mono mb-1 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
             <%= @conversation.topic %>
           </p>
 
@@ -269,14 +269,18 @@ defmodule AhptaWeb.ConversationLive.Show do
             phx-click={JS.push_focus()}
             class="inline-block"
           >
-            <.button class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400">
+            <%!-- <.button class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400">
               Edit convo
-            </.button>
+            </.button> --%>
           </.link>
         </.header>
 
-         <%!-- message_list component --%>
-        <div>
+        <%!-- message_list component --%>
+        <div
+          id="messages_list_scrolling_container"
+          class="message-container overflow-y-scroll"
+          phx-hook="ScrollDown"
+        >
           <ul id="message-list" phx-update="replace" class="space-y-4">
             <md-block :for={message <- @messages} class="mt-5 mb-5 block" id={Ecto.UUID.generate()}>
               <li
