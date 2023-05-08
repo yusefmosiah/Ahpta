@@ -275,6 +275,7 @@ defmodule AhptaWeb.ConversationLive.Show do
           </.link>
         </.header>
 
+         <%!-- message_list component --%>
         <div>
           <ul id="message-list" phx-update="replace" class="space-y-4">
             <md-block :for={message <- @messages} class="mt-5 mb-5 block" id={Ecto.UUID.generate()}>
@@ -302,6 +303,8 @@ defmodule AhptaWeb.ConversationLive.Show do
             </md-block>
           </ul>
         </div>
+
+        <%!-- new message form component --%>
         <div class="mt-6 space-y-4 dark:text-white">
           <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="mt-10">
             <MultiSelect.multi_select

@@ -42,12 +42,14 @@ defmodule AhptaWeb.BotLive.Index do
     {:noreply, stream_insert(socket, :bots, bot)}
   end
 
+  #fixme: use push_navigate to reload page to workaround bug where bots (and convos) disappear after creation/editing/deleting
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     bot = Bots.get_bot!(id)
     {:ok, _} = Bots.delete_bot(bot)
 
-    {:noreply, stream_delete(socket, :bots, bot)}
+    {:noreply, stream_delete(socket, :bots, bot)
+    |> put_flash(:info, "Bot deleted")}
   end
 
   @impl true
