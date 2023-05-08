@@ -253,7 +253,7 @@ defmodule Ahpta.Conversations do
   """
   def get_conversation_and_messages(conversation_id) do
     with {:ok, conversation} <- get_conversation(conversation_id),
-         {:ok, messages} <- Messages.list_messages(conversation_id) do
+         messages <- Messages.list_messages(conversation_id) do
       {conversation, messages}
     end
   end

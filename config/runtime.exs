@@ -68,6 +68,12 @@ if config_env() == :prod do
     organization_key: System.get_env("OPENAI_ORGANIZATION_KEY"),
     http_options: [recv_timeout: 50_000]
 
+  config :qdrant,
+    port: 6333,
+    interface: "rest",
+    database_url: System.get_env("QDRANT_DATABASE_URL"),
+    api_key: System.get_env("QDRANT_API_KEY")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key
