@@ -55,7 +55,7 @@ defmodule Ahpta.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.3.5", only: :dev, runtime: false},
       {:phoenix_multi_select, "~> 0.1"},
-      {:qdrant, git: "git@github.com:yusefmosiah/qdrant.git", branch: "fix-delete-points"}
+      {:qdrant, github: "yusefmosiah/qdrant", branch: "fix-delete-points"}
     ]
   end
 

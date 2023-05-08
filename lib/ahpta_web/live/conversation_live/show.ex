@@ -70,6 +70,9 @@ defmodule AhptaWeb.ConversationLive.Show do
 
   @impl true
   def handle_event("new_message", %{"message" => message_params}, socket) do
+    # parse message_params.content for @bot tags
+    # refactor to context
+    # refactor attrs map contruction to use pattern matching
     attrs =
       message_params
       |> Map.put("conversation_id", socket.assigns.conversation.id)
