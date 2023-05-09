@@ -293,9 +293,7 @@ defmodule AhptaWeb.ConversationLive.Show do
             phx-click={JS.push_focus()}
             class="inline-block"
           >
-            <%!-- <.button class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400">
-              Edit convo
-            </.button> --%>
+
           </.link>
         </.header>
 
@@ -353,7 +351,8 @@ defmodule AhptaWeb.ConversationLive.Show do
               value=""
               autofocus="true"
               required
-              class="autoresize mt-4 w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              phx-hook="AutoResize"
+              class="resize-y mt-4 w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             />
             <.input
               type="hidden"
@@ -370,6 +369,7 @@ defmodule AhptaWeb.ConversationLive.Show do
             </.button>
           </.form>
         </div>
+        <%!-- /new message form component --%>
 
         <div class="mt-6 mb-10 flex items-center justify-between">
           <.link

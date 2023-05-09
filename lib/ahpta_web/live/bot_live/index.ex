@@ -89,6 +89,17 @@ defmodule AhptaWeb.BotLive.Index do
     end
   end
 
+  def handle_event("update_bot", params, socket) do
+    IO.inspect(params, label: "uuuuupdate_bot params")
+    system_message = params["system_message"]
+    bot = Bots.get_bot!(params["id"])
+    {:ok, updated_bot} =
+      Bots.update_bot(bot, %{system_message: system_message})
+
+    IO.inspect(updated_bot.system_message, label: "updated_bot")
+    {:noreply, socket}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -112,17 +123,27 @@ defmodule AhptaWeb.BotLive.Index do
               class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white"
               data-bot-id={bot.id}
             >
-              <.link navigate={~p"/bots/#{bot}"} class="block">
+
                 <h2 class="mb-2 text-2xl font-bold">
                   <%= bot.name %>
                 </h2>
-                <p>
-                  Is available for rent: <%= bot.is_available_for_rent %>
-                </p>
-                <p>
-                  System Message: <%= bot.system_message %>
-                </p>
-              </.link>
+            
+                <form phx-change="update_bot">
+
+              <textarea
+                id={bot.id}
+                name="system_message"
+                value={bot.system_message}
+                spellcheck="false"
+                phx-hook="AutoResize"
+                placeholder="<no system message>"
+                class="w-full p-4 rounded-lg leading-tight dark:bg-black dark:text-white"
+              ><%= bot.system_message %></textarea>
+              <input type="hidden" name="id" value={bot.id} />
+
+
+            </form>
+
               <div class="mt-4 flex space-x-4">
                 <.link
                   patch={~p"/bots/#{bot}/edit"}
