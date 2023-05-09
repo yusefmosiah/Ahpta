@@ -6,14 +6,23 @@ defmodule AhptaWeb.ConversationLive.Index do
   alias Ahpta.Conversations.Conversation
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    user_token = Map.get(session, "user_token")
     changeset = Conversation.changeset(%Conversation{}, %{})
 
     socket =
       socket
       |> assign(:changeset, changeset)
 
-    {:ok, stream(socket, :conversations, Conversations.list_conversations_descending())}
+    if connected?(socket) && user_token do
+      user = Ahpta.Accounts.get_user_by_session_token(user_token)
+
+      {:ok,
+       stream(socket, :conversations, Conversations.conversations_for_user(user.id))
+       |> assign(:current_user, user)}
+    else
+      {:ok, stream(socket, :conversations, Conversations.list_conversations_descending())}
+    end
   end
 
   @impl true

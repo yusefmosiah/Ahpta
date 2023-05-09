@@ -94,6 +94,8 @@ defmodule AhptaWeb.ConversationLive.Show do
     # refactor the body of this code to messages context
     case Messages.create_message(attrs) do
       {:ok, message} ->
+        Conversations.add_user_to_conversation(socket.assigns.current_user.id, socket.assigns.conversation.id)
+
         task_ref =
           Task.Supervisor.async_nolink(Ahpta.TaskSupervisor, fn ->
             Messages.handle_tasks(message)

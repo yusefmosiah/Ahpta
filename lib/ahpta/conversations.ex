@@ -7,6 +7,7 @@ defmodule Ahpta.Conversations do
   alias Ahpta.Repo
 
   alias Ahpta.Conversations.Conversation
+  alias Ahpta.Conversations.ConversationParticipant
   alias Ahpta.Messages
 
   @doc """
@@ -28,6 +29,21 @@ defmodule Ahpta.Conversations do
     |> Repo.all()
   end
 
+  def conversations_for_user(user_id) do
+    conversation_participant_subquery =
+      from(cp in ConversationParticipant,
+        where: cp.participant_id == ^user_id,
+        select: cp.conversation_id
+      )
+
+    from(c in Conversation,
+      where: c.id in subquery(conversation_participant_subquery),
+      order_by: [desc: c.inserted_at]
+    )
+    |> Repo.all()
+    |> Repo.preload(:conversation_participants)
+  end
+
   @doc """
   Gets a single conversation.
 
@@ -44,7 +60,7 @@ defmodule Ahpta.Conversations do
   """
   def get_conversation!(id) do
     Repo.get!(Conversation, id)
-    |> Repo.preload(:messages)
+    |> Repo.preload([:conversation_participants, :messages])
   end
 
   def get_conversation(id) do
@@ -235,6 +251,26 @@ defmodule Ahpta.Conversations do
         attrs \\ %{}
       ) do
     ConversationParticipant.changeset(conversation_participant, attrs)
+  end
+
+  def add_user_to_conversation(user_id, conversation_id) do
+    already_exists? =
+      Repo.exists?(
+        from(cp in ConversationParticipant,
+          where: cp.participant_id == ^user_id and cp.conversation_id == ^conversation_id
+        )
+      )
+
+    unless already_exists? do
+      %ConversationParticipant{}
+      |> ConversationParticipant.changeset(%{
+        participant_id: user_id,
+        conversation_id: conversation_id,
+        participant_type: "user",
+        owner_permission: false
+      })
+      |> Repo.insert()
+    end
   end
 
   @doc """

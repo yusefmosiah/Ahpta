@@ -24,8 +24,8 @@ defmodule Ahpta.Messages do
   end
 
   def list_messages(conversation_id) do
-    from(m in Message, where: m.conversation_id == ^conversation_id)
-    |> order_by([m], asc: m.inserted_at)
+    from(m in Message, where: m.conversation_id == ^conversation_id,
+    order_by: [asc: m.inserted_at])
     |> Repo.all()
     |> Repo.preload(:sender)
   end
