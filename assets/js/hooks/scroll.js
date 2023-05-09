@@ -5,8 +5,11 @@ export default ScrollDown = {
     },
 
     updated() {
-      if (this.el.dataset.scrolledToTop == "false") {
+    var scrolledToEnd = this.el.scrollHeight - Math.round(this.el.scrollTop) === this.el.clientHeight;
+
+      if (!scrolledToEnd || this.el.dataset.scrolledToTop == "false") {
         this.el.scrollTop = this.el.scrollHeight
+
       }
     }
   }
