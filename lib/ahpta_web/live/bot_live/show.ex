@@ -2,6 +2,7 @@ defmodule AhptaWeb.BotLive.Show do
   use AhptaWeb, :live_view
 
   alias Ahpta.Bots
+  alias AhptaWeb.MessageListComponent
 
   @impl true
   def mount(_params, _session, socket) do
@@ -38,6 +39,8 @@ defmodule AhptaWeb.BotLive.Show do
         <%= @subscribed_conversations |> Enum.map(&(&1 <> " | ")) %>
       </:item>
     </.list>
+    <MessageListComponent.message_list messages={@messages} ongoing_messages={@ongoing_messages} />
+
 
     <.back navigate={~p"/bots"}>Back to bots</.back>
 

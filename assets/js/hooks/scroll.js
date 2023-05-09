@@ -5,11 +5,11 @@ export default ScrollDown = {
     },
 
     updated() {
-    var scrolledToEnd = this.el.scrollHeight - Math.round(this.el.scrollTop) === this.el.clientHeight;
+    // var scrolledToEnd = this.el.scrollHeight - Math.round(this.el.scrollTop) === this.el.clientHeight;
 
-      if (!scrolledToEnd || this.el.dataset.scrolledToTop == "false") {
-        this.el.scrollTop = this.el.scrollHeight
+    //   if (!scrolledToEnd || this.el.dataset.scrolledToTop == "false") {
+    //     this.el.scrollTop = this.el.scrollHeight
 
-      }
+    //   }
     }
   }

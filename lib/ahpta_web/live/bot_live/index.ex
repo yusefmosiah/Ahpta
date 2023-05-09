@@ -93,8 +93,7 @@ defmodule AhptaWeb.BotLive.Index do
     IO.inspect(params, label: "uuuuupdate_bot params")
     system_message = params["system_message"]
     bot = Bots.get_bot!(params["id"])
-    {:ok, updated_bot} =
-      Bots.update_bot(bot, %{system_message: system_message})
+    {:ok, updated_bot} = Bots.update_bot(bot, %{system_message: system_message})
 
     IO.inspect(updated_bot.system_message, label: "updated_bot")
     {:noreply, socket}
@@ -123,42 +122,23 @@ defmodule AhptaWeb.BotLive.Index do
               class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white"
               data-bot-id={bot.id}
             >
+              <h2 class="mb-2 text-2xl font-bold">
+                <%= bot.name %>
+              </h2>
 
-                <h2 class="mb-2 text-2xl font-bold">
-                  <%= bot.name %>
-                </h2>
-            
-                <form phx-change="update_bot">
+              <form phx-change="update_bot">
+                <textarea
+                  id={bot.id}
+                  name="system_message"
+                  value={bot.system_message}
+                  spellcheck="false"
+                  phx-hook="AutoResize"
+                  placeholder="<no system message>"
+                  class="w-full rounded-lg p-4 leading-tight dark:bg-black dark:text-white"
+                ><%= bot.system_message %></textarea>
+                <input type="hidden" name="id" value={bot.id} />
+              </form>
 
-              <textarea
-                id={bot.id}
-                name="system_message"
-                value={bot.system_message}
-                spellcheck="false"
-                phx-hook="AutoResize"
-                placeholder="<no system message>"
-                class="w-full p-4 rounded-lg leading-tight dark:bg-black dark:text-white"
-              ><%= bot.system_message %></textarea>
-              <input type="hidden" name="id" value={bot.id} />
-
-
-            </form>
-
-              <div class="mt-4 flex space-x-4">
-                <.link
-                  patch={~p"/bots/#{bot}/edit"}
-                  class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  Edit
-                </.link>
-                <.link
-                  phx-click={JS.push("delete", value: %{id: bot.id}) |> hide("##{id}")}
-                  data-confirm="Are you sure?"
-                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                >
-                  Delete
-                </.link>
-              </div>
             </div>
           <% end %>
         </div>
