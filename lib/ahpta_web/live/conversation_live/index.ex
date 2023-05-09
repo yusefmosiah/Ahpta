@@ -13,7 +13,7 @@ defmodule AhptaWeb.ConversationLive.Index do
       socket
       |> assign(:changeset, changeset)
 
-    {:ok, stream(socket, :conversations, Conversations.list_conversations())}
+    {:ok, stream(socket, :conversations, Conversations.list_conversations_descending())}
   end
 
   @impl true

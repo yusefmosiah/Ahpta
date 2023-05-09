@@ -22,6 +22,12 @@ defmodule Ahpta.Conversations do
     Repo.all(Conversation)
   end
 
+  def list_conversations_descending do
+    Conversation
+    |> order_by([c], desc: c.inserted_at)
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single conversation.
 

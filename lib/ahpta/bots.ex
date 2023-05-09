@@ -23,6 +23,12 @@ defmodule Ahpta.Bots do
     Repo.all(Bot)
   end
 
+  def list_bots_descending do
+    Bot
+    |> order_by([b], desc: b.inserted_at)
+    |> Repo.all()
+  end
+
   def get_bot_by_name(name) do
     Repo.get_by(Bot, name: name)
   end
