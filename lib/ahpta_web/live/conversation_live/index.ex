@@ -6,6 +6,12 @@ defmodule AhptaWeb.ConversationLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    changeset = Conversation.changeset(%Conversation{}, %{})
+
+    socket =
+      socket
+      |> assign(:changeset, changeset)
+
     {:ok, stream(socket, :conversations, Conversations.list_conversations())}
   end
 
@@ -15,15 +21,23 @@ defmodule AhptaWeb.ConversationLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    conversation = Conversations.get_conversation!(id)
+    changeset = Conversation.changeset(conversation, %{})
+
     socket
     |> assign(:page_title, "Edit Conversation")
-    |> assign(:conversation, Conversations.get_conversation!(id))
+    |> assign(:conversation, conversation)
+    |> assign(:changeset, changeset)
   end
 
   defp apply_action(socket, :new, _params) do
+    conversation = %Conversation{}
+    changeset = Conversation.changeset(conversation, %{})
+
     socket
     |> assign(:page_title, "New Conversation")
-    |> assign(:conversation, %Conversation{})
+    |> assign(:conversation, conversation)
+    |> assign(:changeset, changeset)
   end
 
   defp apply_action(socket, :index, _params) do
@@ -35,6 +49,18 @@ defmodule AhptaWeb.ConversationLive.Index do
   @impl true
   def handle_info({AhptaWeb.ConversationLive.FormComponent, {:saved, conversation}}, socket) do
     {:noreply, stream_insert(socket, :conversations, conversation)}
+  end
+
+  @impl true
+  def handle_event("update_topic", %{"id" => id, "topic" => topic}, socket) do
+    conversation = Conversations.get_conversation!(id)
+    changeset = Ecto.Changeset.change(conversation, %{topic: topic})
+
+    case Conversations.update_conversation(conversation, changeset) do
+      {:ok, _conversation} -> {:noreply, socket}
+      # Handle error as desired
+      {:error, _changeset} -> {:noreply, socket}
+    end
   end
 
   @impl true
@@ -62,6 +88,7 @@ defmodule AhptaWeb.ConversationLive.Index do
           </span>
         </div>
 
+        <%!-- conversation card --%>
         <div class="space-y-4">
           <%= for {id, conversation} <- @streams.conversations do %>
             <.link
@@ -98,6 +125,7 @@ defmodule AhptaWeb.ConversationLive.Index do
             </.link>
           <% end %>
         </div>
+        <%!-- /conversation card --%>
 
         <div class="mt-6 mb-10 flex items-center justify-between">
           <.link

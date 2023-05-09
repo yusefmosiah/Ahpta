@@ -64,6 +64,17 @@ defmodule AhptaWeb.ConversationLive.Show do
      |> assign(:conversation, Conversations.get_conversation!(id))}
   end
 
+  def handle_event("update_topic", params, socket) do
+    IO.inspect(params, label: "uuuuupdate_topic params")
+    topic = params["topic"]
+
+    {:ok, updated_convo} =
+      Conversations.update_conversation(socket.assigns.conversation, %{topic: topic})
+
+    IO.inspect(updated_convo.topic, label: "updated_convo")
+    {:noreply, assign(socket, :conversation, updated_convo)}
+  end
+
   def handle_event("toggle_dropdown", _, socket) do
     {:noreply, update(socket, :dropdown_visible, &(!&1))}
   end
@@ -257,11 +268,24 @@ defmodule AhptaWeb.ConversationLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="max-w-1/2 container mx-auto w-full">
+    <div class="max-w-1/2 container mx-auto w-full pb-10">
       <div class="mx-auto dark:bg-black">
         <.header>
           <p class="font-mono mb-1 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
-            <%= @conversation.topic %>
+            <div class="flex-grow" id="content_editable" phx-hook="content_editable"></div>
+
+            <form phx-change="update_topic">
+              <input
+                type="text"
+                id={"topic-" <> @conversation.id}
+                name="topic"
+                value={@conversation.topic}
+                spellcheck="false"
+                autocomplete="off"
+                class="font-mono rounded-lg border-zinc-200 text-5xl font-bold leading-tight dark:bg-black dark:text-white"
+              />
+              <input type="hidden" name="id" value={@conversation.id} />
+            </form>
           </p>
 
           <.link
@@ -327,6 +351,7 @@ defmodule AhptaWeb.ConversationLive.Show do
               name="message[content]"
               placeholder="message content..."
               value=""
+              autofocus="true"
               required
               class="autoresize mt-4 w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             />
