@@ -103,7 +103,7 @@ defmodule AhptaWeb.BotLive.Index do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-screen-xl px-4">
-      <div class="mx-auto px-4 py-6 dark:bg-black">
+      <div class="mx-auto py-6 dark:bg-black">
         <div class="mb-10 flex items-center justify-between">
           <h1 class="mt-7 mb-6 text-5xl font-bold text-gray-900 dark:text-gray-100">Bots</h1>
           <span class="space-x-2">
