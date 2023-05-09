@@ -16,7 +16,9 @@ defmodule Ahpta.ConversationsTest do
     end
 
     test "get_conversation!/1 returns the conversation with given id" do
-      conversation = conversation_fixture() |> Repo.preload([:messages, :conversation_participants])
+      conversation =
+        conversation_fixture() |> Repo.preload([:messages, :conversation_participants])
+
       assert Conversations.get_conversation!(conversation.id) == conversation
     end
 

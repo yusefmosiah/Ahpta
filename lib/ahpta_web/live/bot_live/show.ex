@@ -41,7 +41,6 @@ defmodule AhptaWeb.BotLive.Show do
     </.list>
     <MessageListComponent.message_list messages={@messages} ongoing_messages={@ongoing_messages} />
 
-
     <.back navigate={~p"/bots"}>Back to bots</.back>
 
     <.modal :if={@live_action == :edit} id="bot-modal" show on_cancel={JS.patch(~p"/bots/#{@bot}")}>

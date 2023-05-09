@@ -138,7 +138,6 @@ defmodule AhptaWeb.BotLive.Index do
                 ><%= bot.system_message %></textarea>
                 <input type="hidden" name="id" value={bot.id} />
               </form>
-
             </div>
           <% end %>
         </div>

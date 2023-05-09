@@ -21,7 +21,7 @@ defmodule AhptaWeb.ConversationLive.Index do
        stream(socket, :conversations, Conversations.conversations_for_user(user.id))
        |> assign(:current_user, user)}
     else
-      {:ok, stream(socket, :conversations, Conversations.list_conversations_descending())}
+      {:ok, stream(socket, :conversations, [])}
     end
   end
 
@@ -122,18 +122,8 @@ defmodule AhptaWeb.ConversationLive.Index do
                 <h2 class="mb-2 text-2xl font-bold">
                   <%= conversation.topic %>
                 </h2>
-                <p class="font-narrow text-gray-400">
-                  Is published: <%= conversation.is_published %>
-                </p>
-                <div class="mt-4 flex space-x-4">
-                  <.link
-                    patch={~p"/conversations/#{conversation}/edit"}
-                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                    id={"edit-conversation-link-#{conversation.id}"}
-                  >
-                    Edit
-                  </.link>
 
+                <div class="mt-4 flex justify-end space-x-4">
                   <.link
                     phx-click={JS.push("delete", value: %{id: conversation.id}) |> hide("##{id}")}
                     data-confirm="Are you sure?"

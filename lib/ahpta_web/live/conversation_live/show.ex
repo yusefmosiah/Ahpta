@@ -9,7 +9,6 @@ defmodule AhptaWeb.ConversationLive.Show do
   alias Phoenix.LiveView.Components.MultiSelect
   alias AhptaWeb.Components.MessageListComponent
 
-
   @impl true
   def mount(%{"id" => id}, session, socket) do
     user_token = Map.get(session, "user_token")
@@ -94,7 +93,10 @@ defmodule AhptaWeb.ConversationLive.Show do
     # refactor the body of this code to messages context
     case Messages.create_message(attrs) do
       {:ok, message} ->
-        Conversations.add_user_to_conversation(socket.assigns.current_user.id, socket.assigns.conversation.id)
+        Conversations.add_user_to_conversation(
+          socket.assigns.current_user.id,
+          socket.assigns.conversation.id
+        )
 
         task_ref =
           Task.Supervisor.async_nolink(Ahpta.TaskSupervisor, fn ->
@@ -302,7 +304,6 @@ defmodule AhptaWeb.ConversationLive.Show do
 
         <MessageListComponent.message_list messages={@messages} ongoing_messages={@ongoing_messages} />
 
-
         <%!-- new message form component --%>
         <div class="mt-6 space-y-4 dark:text-white">
           <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="mt-10">
@@ -336,7 +337,7 @@ defmodule AhptaWeb.ConversationLive.Show do
             />
             <.button
               type="submit"
-              class="font-mono mt-4 ml-2 rounded-md border-4 border-double border-blue-400 bg-none p-1.5 py-4 text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
+              class="font-mono mt-4 ml-2 rounded-md border-4 border-double border-blue-400 bg-none p-1 py-4 text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
             >
               Send
             </.button>
