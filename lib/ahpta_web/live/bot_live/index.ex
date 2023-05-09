@@ -91,9 +91,10 @@ defmodule AhptaWeb.BotLive.Index do
 
   def handle_event("update_bot", params, socket) do
     IO.inspect(params, label: "uuuuupdate_bot params")
+    name = params["name"]
     system_message = params["system_message"]
     bot = Bots.get_bot!(params["id"])
-    {:ok, updated_bot} = Bots.update_bot(bot, %{system_message: system_message})
+    {:ok, updated_bot} = Bots.update_bot(bot, %{name: name, system_message: system_message})
 
     IO.inspect(updated_bot.system_message, label: "updated_bot")
     {:noreply, socket}
@@ -122,11 +123,18 @@ defmodule AhptaWeb.BotLive.Index do
               class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white"
               data-bot-id={bot.id}
             >
-              <h2 class="mb-2 text-2xl font-bold">
-                <%= bot.name %>
-              </h2>
 
               <form phx-change="update_bot">
+              <input
+                type="text"
+                id={"name-" <> bot.id}
+                name="name"
+                value={bot.name}
+                spellcheck="false"
+                autocomplete="off"
+                placeholder="<bot name>"
+                class="w-full mb-4 font-mono rounded-lg border-double border-zinc-200 dark:border-zinc-700 text-xl font-bold leading-tight dark:bg-black dark:text-white"
+              />
                 <textarea
                   id={bot.id}
                   name="system_message"
@@ -134,7 +142,7 @@ defmodule AhptaWeb.BotLive.Index do
                   spellcheck="false"
                   phx-hook="AutoResize"
                   placeholder="<no system message>"
-                  class="w-full rounded-lg p-4 leading-tight dark:bg-black dark:text-white"
+                  class="w-full rounded-lg p-4 leading-tight border-double border-zinc-200 dark:border-zinc-700 dark:bg-black dark:text-white"
                 ><%= bot.system_message %></textarea>
                 <input type="hidden" name="id" value={bot.id} />
               </form>
