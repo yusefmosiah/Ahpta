@@ -1,4 +1,5 @@
 defmodule AhptaWeb.BotLive.Index do
+  require Logger
   use AhptaWeb, :live_view
 
   alias Ahpta.Bots
@@ -11,7 +12,7 @@ defmodule AhptaWeb.BotLive.Index do
 
     bots = Bots.list_bots_descending()
 
-    {:ok, stream(socket, :bots, bots) |> assign(:conversations, conversations)}
+    {:ok, assign(socket, :bots, bots) |> assign(:conversations, conversations)}
   end
 
   @impl true
@@ -39,7 +40,7 @@ defmodule AhptaWeb.BotLive.Index do
 
   @impl true
   def handle_info({AhptaWeb.BotLive.FormComponent, {:saved, bot}}, socket) do
-    {:noreply, stream_insert(socket, :bots, bot)}
+    {:noreply, assign(socket, :bots, [bot | socket.assigns.bots])}
   end
 
   # fixme: use push_navigate to reload page to workaround bug where bots (and convos) disappear after creation/editing/deleting
@@ -47,9 +48,9 @@ defmodule AhptaWeb.BotLive.Index do
   def handle_event("delete", %{"id" => id}, socket) do
     bot = Bots.get_bot!(id)
     {:ok, _} = Bots.delete_bot(bot)
-
+    bots = Bots.list_bots_descending()
     {:noreply,
-     stream_delete(socket, :bots, bot)
+     assign(socket, :bots, bots)
      |> put_flash(:info, "Bot deleted")}
   end
 
@@ -89,6 +90,20 @@ defmodule AhptaWeb.BotLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("new_bot", _, socket) do
+    bot_params = %{name: MnemonicSlugs.generate_slug(3), system_message: ""}
+
+    case Bots.create_bot(bot_params) do
+      {:ok, new_bot} ->
+        {:noreply, assign(socket, :bots, [new_bot | socket.assigns.bots])}
+
+      {:error, changeset} ->
+        Logger.error("error creating bot. changeset: #{inspect(changeset)}")
+        {:noreply, socket}
+    end
+  end
+
   def handle_event("update_bot", params, socket) do
     IO.inspect(params, label: "uuuuupdate_bot params")
     name = params["name"]
@@ -109,7 +124,7 @@ defmodule AhptaWeb.BotLive.Index do
           <h1 class="mt-7 mb-6 text-5xl font-bold text-gray-900 dark:text-gray-100">Bots</h1>
           <span class="space-x-2">
             <.link
-              patch={~p"/bots/new"}
+              phx-click="new_bot"
               class="font-mono rounded-lg border-4 border-double border-green-400 bg-none p-4 text-green-500 hover:border-green-200 hover:bg-green-500 hover:text-white dark:border-green-400 dark:text-green-500 dark:hover:bg-green-700 dark:hover:text-white"
             >
               New Bot
@@ -118,7 +133,7 @@ defmodule AhptaWeb.BotLive.Index do
         </div>
 
         <div class="space-y-4">
-          <%= for {id, bot} <- @streams.bots do %>
+          <%= for bot <- @bots do %>
             <div
               class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white"
               data-bot-id={bot.id}
