@@ -7,6 +7,7 @@ window.addEventListener("phx:submit", function (event) {
 
     if (messageInput) {
         const conversationId = messageInput.form.dataset.conversationId;
+        console.log("conversationId", conversationId);
         const savedMessageContentKey = `new_message_content_${conversationId}`;
         localStorage.removeItem(savedMessageContentKey);
     }

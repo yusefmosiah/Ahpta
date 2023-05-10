@@ -278,7 +278,6 @@ defmodule AhptaWeb.ConversationLive.Show do
     <div class="max-w-1/2 container mx-auto w-full pb-10">
       <div class="mx-auto dark:bg-black">
         <.header>
-          <p class="font-mono mb-1 text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
             <div class="flex-grow" id="content_editable" phx-hook="content_editable"></div>
 
             <form phx-change="update_topic">
@@ -289,11 +288,10 @@ defmodule AhptaWeb.ConversationLive.Show do
                 value={@conversation.topic}
                 spellcheck="false"
                 autocomplete="off"
-                class="font-mono rounded-lg border-zinc-200 text-5xl font-bold leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
+                class="font-mono rounded-lg border-zinc-200 text-4xl font-bold leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
               />
               <input type="hidden" name="id" value={@conversation.id} />
             </form>
-          </p>
 
           <.link
             patch={~p"/conversations/#{@conversation}/show/edit"}
@@ -326,6 +324,7 @@ defmodule AhptaWeb.ConversationLive.Show do
               value="human"
               required
             />
+            <div class="flex items-center space-x-4 mt-4">
             <MultiSelect.multi_select
               id="multi"
               options={@bot_options}
@@ -337,10 +336,11 @@ defmodule AhptaWeb.ConversationLive.Show do
             />
             <button
               type="submit"
-              class="font-mono mt-4 rounded-md border-4 border-double border-blue-400 bg-none p-1 py-4 text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
+              class="font-mono mt-4 rounded-md border-4 border-double border-blue-400 bg-none p-1  text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
             >
               Send
             </button>
+            </div>
           </.form>
         </div>
         <%!-- /new message form component --%>
