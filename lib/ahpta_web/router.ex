@@ -22,18 +22,7 @@ defmodule AhptaWeb.Router do
 
     get("/", PageController, :home)
 
-    live("/conversations", ConversationLive.Index, :index)
-    live("/conversations/new", ConversationLive.Index, :new)
-    live("/conversations/:id/edit", ConversationLive.Index, :edit)
     live("/conversations/:id", ConversationLive.Show, :show)
-    live("/conversations/:id/show/edit", ConversationLive.Show, :edit)
-    live("/conversations/:id/new_message", ConversationLive.Show, :new_message)
-
-    live("/bots", BotLive.Index, :index)
-    live("/bots/new", BotLive.Index, :new)
-    live("/bots/:id/edit", BotLive.Index, :edit)
-    live("/bots/:id", BotLive.Show, :show)
-    live("/bots/:id/show/edit", BotLive.Show, :edit)
   end
 
   # Other scopes may use custom stacks.
@@ -81,6 +70,10 @@ defmodule AhptaWeb.Router do
       on_mount: [{AhptaWeb.UserAuth, :ensure_authenticated}] do
       live("/users/settings", UserSettingsLive, :edit)
       live("/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email)
+
+      live("/conversations", ConversationLive.Index, :index)
+
+      live("/bots", BotLive.Index, :index)
     end
   end
 

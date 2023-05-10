@@ -89,59 +89,6 @@ defmodule AhptaWeb.CoreComponents do
     """
   end
 
-  attr(:id, :string, required: true)
-  attr(:show, :boolean, default: false)
-  attr(:on_cancel, JS, default: %JS{})
-  slot(:inner_block, required: true)
-
-  def dark_modal(assigns) do
-    ~H"""
-    <div
-      id={@id}
-      phx-mounted={@show && show_modal(@id)}
-      phx-remove={hide_modal(@id)}
-      data-cancel={JS.exec(@on_cancel, "phx-remove")}
-      class="relative z-50 hidden"
-    >
-      <div id={"#{@id}-bg"} class="fixed inset-0 backdrop-blur transition-opacity" aria-hidden="true" />
-      <div
-        class="fixed inset-0 overflow-y-auto"
-        aria-labelledby={"#{@id}-title"}
-        aria-describedby={"#{@id}-description"}
-        role="dialog"
-        aria-modal="true"
-        tabindex="0"
-      >
-        <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8">
-            <.focus_wrap
-              id={"#{@id}-container"}
-              phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
-              phx-key="escape"
-              phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white bg-opacity-10 p-14 shadow-lg ring-1 transition"
-            >
-              <div class="absolute top-6 right-5">
-                <button
-                  phx-click={JS.exec("data-cancel", to: "##{@id}")}
-                  type="button"
-                  class="m-3 flex-none p-3 opacity-20 hover:opacity-40"
-                  aria-label={gettext("close")}
-                >
-                  <.icon name="hero-x-mark-solid" class="h-5 w-5" />
-                </button>
-              </div>
-              <div id={"#{@id}-content"}>
-                <%= render_slot(@inner_block) %>
-              </div>
-            </.focus_wrap>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
   @doc """
   Renders flash notices.
 
@@ -211,18 +158,54 @@ defmodule AhptaWeb.CoreComponents do
     """
   end
 
+  # @doc """
+  # Renders a simple form.
+
+  # ## Examples
+
+  #     <.simple_form for={@form} phx-change="validate" phx-submit="save">
+  #       <.input field={@form[:email]} label="Email"/>
+  #       <.input field={@form[:username]} label="Username" />
+  #       <:actions>
+  #         <.button>Save</.button>
+  #       </:actions>
+  #     </.simple_form>
+  # """
+  # attr :for, :any, required: true, doc: "the datastructure for the form"
+  # attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
+
+  # attr :rest, :global,
+  #   include: ~w(autocomplete name rel action enctype method novalidate target),
+  #   doc: "the arbitrary HTML attributes to apply to the form tag"
+
+  # slot :inner_block, required: true
+  # slot :actions, doc: "the slot for form actions, such as a submit button"
+
+  # def simple_form(assigns) do
+  #   ~H"""
+  #   <.form :let={f} for={@for} as={@as} {@rest}>
+  #     <div class="mt-10 space-y-8 bg-white">
+  #       <%= render_slot(@inner_block, f) %>
+  #       <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
+  #         <%= render_slot(action, f) %>
+  #       </div>
+  #     </div>
+  #   </.form>
+  #   """
+  # end
+
   @doc """
   Renders a simple form.
 
   ## Examples
 
-      <.simple_form for={@form} phx-change="validate" phx-submit="save">
-        <.input field={@form[:email]} label="Email"/>
-        <.input field={@form[:username]} label="Username" />
-        <:actions>
-          <.button>Save</.button>
-        </:actions>
-      </.simple_form>
+  <.simple_form for={@form} phx-change="validate" phx-submit="save">
+  <.input field={@form[:email]} label="Email"/>
+  <.input field={@form[:username]} label="Username" />
+  <:actions>
+    <.button>Save</.button>
+  </:actions>
+  </.simple_form>
   """
   attr(:for, :any, required: true, doc: "the datastructure for the form")
   attr(:as, :any, default: nil, doc: "the server side parameter to collect all input under")
@@ -238,9 +221,9 @@ defmodule AhptaWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white">
+      <div class="mt-10 space-y-8 rounded-xl bg-white bg-opacity-40 p-6 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-zinc-200">
         <%= render_slot(@inner_block, f) %>
-        <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
+        <div :for={action <- @actions} class="mt-4 mb-4 flex items-center justify-between">
           <%= render_slot(action, f) %>
         </div>
       </div>
@@ -327,13 +310,40 @@ defmodule AhptaWeb.CoreComponents do
     |> input()
   end
 
+  # def input(%{type: "checkbox", value: value} = assigns) do
+  #   assigns =
+  #     assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
+
+  #   ~H"""
+  #   <div phx-feedback-for={@name}>
+  #     <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
+  #       <input type="hidden" name={@name} value="false" />
+  #       <input
+  #         type="checkbox"
+  #         id={@id}
+  #         name={@name}
+  #         value="true"
+  #         checked={@checked}
+  #         class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
+  #         {@rest}
+  #       />
+  #       <%= @label %>
+  #     </label>
+  #     <.error :for={msg <- @errors}><%= msg %></.error>
+  #   </div>
+  #   """
+  # end
+
   def input(%{type: "checkbox", value: value} = assigns) do
     assigns =
       assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
 
     ~H"""
-    <div phx-feedback-for={@name}>
-      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
+    <div
+      phx-feedback-for={@name}
+      class="rounded-lg bg-white p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-40 dark:text-white"
+    >
+      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600 dark:text-zinc-200">
         <input type="hidden" name={@name} value="false" />
         <input
           type="checkbox"
@@ -370,18 +380,40 @@ defmodule AhptaWeb.CoreComponents do
     """
   end
 
+  # def input(%{type: "textarea"} = assigns) do
+  #   ~H"""
+  #   <div phx-feedback-for={@name}>
+  #     <.label for={@id}><%= @label %></.label>
+  #     <textarea
+  #       id={@id}
+  #       name={@name}
+  #       class={[
+  #         "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
+  #         "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
+  #         "min-h-[6rem] border-zinc-300 focus:border-zinc-400",
+  #         @errors != [] && "border-rose-400 focus:border-rose-400"
+  #       ]}
+  #       {@rest}
+  #     ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
+  #     <.error :for={msg <- @errors}><%= msg %></.error>
+  #   </div>
+  #   """
+  # end
+
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div
+      phx-feedback-for={@name}
+      class="rounded-lg bg-white pt-8 shadow-md backdrop-blur-md dark:bg-black dark:bg-opacity-40 dark:text-white"
+    >
       <.label for={@id}><%= @label %></.label>
       <textarea
         id={@id}
         name={@name}
         class={[
-          "dark:bg-black dark:text-white p-2 border border-zinc-800 focus:border-zinc-400",
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
-          "min-h-[6rem] border-zinc-300 focus:border-zinc-400",
+          "p-2  w-full rounded-lg text-zinc-900  sm:text-sm sm:leading-6",
+          "dark:phx-no-feedback:border-zinc-700 phx-no-feedback:border-zinc-200 phx-no-feedback:focus:border-zinc-400",
+          "min-h-[6rem] border-zinc-300 focus:border-zinc-400 dark:border-zinc-700 dark:bg-black dark:text-white",
           @errors != [] && "border-rose-400 focus:border-rose-400"
         ]}
         {@rest}
@@ -391,7 +423,6 @@ defmodule AhptaWeb.CoreComponents do
     """
   end
 
-  # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
@@ -405,7 +436,8 @@ defmodule AhptaWeb.CoreComponents do
           "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
           "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
           "border-zinc-300 focus:border-zinc-400",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
+          @errors != [] && "border-rose-400 focus:border-rose-400",
+          "dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-gray-500"
         ]}
         {@rest}
       />
@@ -420,9 +452,20 @@ defmodule AhptaWeb.CoreComponents do
   attr(:for, :string, default: nil)
   slot(:inner_block, required: true)
 
+  # def label(assigns) do
+  #   ~H"""
+  #   <label for={@for} class="dark:text-zinc-200 bg-none block text-sm font-semibold leading-6 text-zinc-800">
+  #     <%= render_slot(@inner_block) %>
+  #   </label>
+  #   """
+  # end
+
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label
+      for={@for}
+      class="bg-none text-sm font-semibold leading-6 text-zinc-800 backdrop-blur-md dark:bg-gray-800 dark:bg-opacity-75 dark:text-gray-100"
+    >
       <%= render_slot(@inner_block) %>
     </label>
     """

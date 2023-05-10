@@ -47,7 +47,7 @@ defmodule AhptaWeb.ConversationLiveTest do
     #   assert html =~ "some topic"
     # end
 
-    #fixme to test editing conversation topic in show
+    # fixme to test editing conversation topic in show
     # test "updates conversation in listing", %{conn: conn, conversation: conversation} do
     #   {:ok, index_live, _html} = live(conn, ~p"/conversations")
 
@@ -73,15 +73,15 @@ defmodule AhptaWeb.ConversationLiveTest do
     # end
 
     # fixme after logged in user
-  #   test "deletes conversation in listing", %{conn: conn, conversation: conversation} do
-  #     {:ok, index_live, _html} = live(conn, ~p"/conversations")
+    #   test "deletes conversation in listing", %{conn: conn, conversation: conversation} do
+    #     {:ok, index_live, _html} = live(conn, ~p"/conversations")
 
-  #     assert index_live
-  #            |> element("a#delete-conversation-link-#{conversation.id}")
-  #            |> render_click()
+    #     assert index_live
+    #            |> element("a#delete-conversation-link-#{conversation.id}")
+    #            |> render_click()
 
-  #     refute has_element?(index_live, "[data-conversation-id='#{conversation.id}']")
-  #   end
+    #     refute has_element?(index_live, "[data-conversation-id='#{conversation.id}']")
+    #   end
   end
 
   describe "Show" do

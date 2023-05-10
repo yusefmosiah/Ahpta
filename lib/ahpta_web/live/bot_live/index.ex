@@ -49,6 +49,7 @@ defmodule AhptaWeb.BotLive.Index do
     bot = Bots.get_bot!(id)
     {:ok, _} = Bots.delete_bot(bot)
     bots = Bots.list_bots_descending()
+
     {:noreply,
      assign(socket, :bots, bots)
      |> put_flash(:info, "Bot deleted")}
@@ -138,18 +139,17 @@ defmodule AhptaWeb.BotLive.Index do
               class="rounded-lg bg-white bg-opacity-40 p-4 shadow-md backdrop-blur-md dark:border-2 dark:border-double dark:border-gray-700 dark:bg-gray-800 dark:bg-opacity-75 dark:text-white"
               data-bot-id={bot.id}
             >
-
               <form phx-change="update_bot">
-              <input
-                type="text"
-                id={"name-" <> bot.id}
-                name="name"
-                value={bot.name}
-                spellcheck="false"
-                autocomplete="off"
-                placeholder="<bot name>"
-                class="w-full mb-4 font-mono rounded-lg border-double border-zinc-200 dark:border-zinc-700 text-xl font-bold leading-tight dark:bg-black dark:text-white"
-              />
+                <input
+                  type="text"
+                  id={"name-" <> bot.id}
+                  name="name"
+                  value={bot.name}
+                  spellcheck="false"
+                  autocomplete="off"
+                  placeholder="<bot name>"
+                  class="font-mono mb-4 w-full rounded-lg border-double border-zinc-200 text-xl font-bold leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
+                />
                 <textarea
                   id={bot.id}
                   name="system_message"
@@ -157,7 +157,7 @@ defmodule AhptaWeb.BotLive.Index do
                   spellcheck="false"
                   phx-hook="AutoResize"
                   placeholder="<no system message>"
-                  class="w-full rounded-lg p-4 leading-tight border-double border-zinc-200 dark:border-zinc-700 dark:bg-black dark:text-white"
+                  class="w-full rounded-lg border-double border-zinc-200 p-4 leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
                 ><%= bot.system_message %></textarea>
                 <input type="hidden" name="id" value={bot.id} />
               </form>
@@ -180,7 +180,7 @@ defmodule AhptaWeb.BotLive.Index do
           </.link>
         </div>
 
-        <.dark_modal
+        <.modal
           :if={@live_action in [:new, :edit]}
           id="bot-modal"
           show
@@ -194,7 +194,7 @@ defmodule AhptaWeb.BotLive.Index do
             bot={@bot}
             patch={~p"/bots"}
           />
-        </.dark_modal>
+        </.modal>
       </div>
     </div>
     """

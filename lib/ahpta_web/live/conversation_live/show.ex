@@ -288,7 +288,7 @@ defmodule AhptaWeb.ConversationLive.Show do
                 value={@conversation.topic}
                 spellcheck="false"
                 autocomplete="off"
-                class="font-mono rounded-lg border-zinc-200 text-5xl font-bold leading-tight dark:bg-black dark:text-white"
+                class="font-mono rounded-lg border-zinc-200 text-5xl font-bold leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
               />
               <input type="hidden" name="id" value={@conversation.id} />
             </form>
@@ -326,7 +326,7 @@ defmodule AhptaWeb.ConversationLive.Show do
               autofocus="true"
               required
               phx-hook="AutoResize"
-              class="mt-4 w-full resize-y rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              class="mt-4 w-full resize-y rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-black dark:bg-gray-700 dark:text-gray-100"
             />
             <.input
               type="hidden"

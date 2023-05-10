@@ -29,10 +29,10 @@
     >
     </script>
   </head>
-  <body class="antialiased dark:bg-black">
+  <body class="pb-40 antialiased dark:bg-black">
     <ul class="relative z-10 flex items-center justify-end gap-4 px-4 sm:px-6 lg:px-8">
       <%= if @current_user do %>
-        <li class="text-[0.8125rem] leading-6 text-zinc-900 dark:text-white">
+        <li class="text-[0.8125rem] leading-6 text-black dark:text-white">
           <%= @current_user.email %>
         </li>
         <li>
@@ -71,6 +71,7 @@
         </li>
       <% end %>
     </ul>
+
     <%= @inner_content %>
   </body>
 </html>

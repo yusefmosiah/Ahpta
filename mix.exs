@@ -56,7 +56,7 @@ defmodule Ahpta.MixProject do
       {:tailwind_formatter, "~> 0.3.5", only: :dev, runtime: false},
       {:phoenix_multi_select, "~> 0.1"},
       {:qdrant, github: "yusefmosiah/qdrant", branch: "fix-delete-points"},
-      {:mnemonic_slugs, "~> 0.0.3"},
+      {:mnemonic_slugs, "~> 0.0.3"}
     ]
   end
 
