@@ -307,7 +307,7 @@ defmodule AhptaWeb.ConversationLive.Show do
 
         <%!-- new message form component --%>
         <div class="space-y-4 dark:text-white">
-          <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="">
+          <.form :let={f} for={%{}} as={:input} phx-submit="new_message" data-conversation-id={@conversation.id} class="">
             <.input
               type="textarea"
               id="content"
