@@ -335,12 +335,12 @@ defmodule AhptaWeb.ConversationLive.Show do
               value="human"
               required
             />
-            <.button
+            <button
               type="submit"
-              class="font-mono mt-4 ml-2 rounded-md border-4 border-double border-blue-400 bg-none p-1 py-4 text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
+              class="font-mono mt-4 rounded-md border-4 border-double border-blue-400 bg-none p-1 py-4 text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
             >
               Send
-            </.button>
+            </button>
           </.form>
         </div>
         <%!-- /new message form component --%>
