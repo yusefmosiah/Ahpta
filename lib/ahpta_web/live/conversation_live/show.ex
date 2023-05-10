@@ -39,6 +39,7 @@ defmodule AhptaWeb.ConversationLive.Show do
         |> Enum.with_index(fn bot, index ->
           %{id: index, label: bot.name, selected: false}
         end)
+        |> Enum.map(&MultiSelect.Option.new/1)
 
       {
         :ok,
@@ -305,18 +306,8 @@ defmodule AhptaWeb.ConversationLive.Show do
         <MessageListComponent.message_list messages={@messages} ongoing_messages={@ongoing_messages} />
 
         <%!-- new message form component --%>
-        <div class="mt-6 space-y-4 dark:text-white">
-          <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="mt-10">
-            <MultiSelect.multi_select
-              id="multi"
-              options={@bot_options}
-              form={f}
-              on_change={fn opts -> send(self(), {:updated_options, opts}) end}
-              placeholder="bots to send this message to..."
-              search_placeholder="search bots..."
-              class="autoresize w-full rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-black dark:text-gray-100"
-            />
-
+        <div class="space-y-4 dark:text-white">
+          <.form :let={f} for={%{}} as={:input} phx-submit="new_message" class="">
             <.input
               type="textarea"
               id="content"
@@ -326,7 +317,7 @@ defmodule AhptaWeb.ConversationLive.Show do
               autofocus="true"
               required
               phx-hook="AutoResize"
-              class="mt-4 w-full resize-y rounded border border-gray-300 p-2 dark:border-gray-600 dark:bg-black dark:bg-gray-700 dark:text-gray-100"
+              class="w-full resize-y rounded border-double border-gray-300 p-2 dark:border-gray-600 dark:bg-black dark:bg-gray-700 dark:text-gray-100"
             />
             <.input
               type="hidden"
@@ -334,6 +325,15 @@ defmodule AhptaWeb.ConversationLive.Show do
               name="message[message_type]"
               value="human"
               required
+            />
+            <MultiSelect.multi_select
+              id="multi"
+              options={@bot_options}
+              form={f}
+              on_change={fn opts -> send(self(), {:updated_options, opts}) end}
+              placeholder="bots to send this message to..."
+              search_placeholder="search bots..."
+              class="autoresize mt-4 w-full rounded dark:bg-black dark:text-gray-100"
             />
             <button
               type="submit"
