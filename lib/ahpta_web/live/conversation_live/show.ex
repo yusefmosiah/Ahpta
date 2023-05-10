@@ -288,7 +288,7 @@ defmodule AhptaWeb.ConversationLive.Show do
                 value={@conversation.topic}
                 spellcheck="false"
                 autocomplete="off"
-                class="font-mono rounded-lg border-zinc-200 text-4xl font-bold leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
+                class="w-full max-w-full font-mono rounded-lg border-zinc-200 text-4xl font-bold leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
               />
               <input type="hidden" name="id" value={@conversation.id} />
             </form>
@@ -324,7 +324,7 @@ defmodule AhptaWeb.ConversationLive.Show do
               value="human"
               required
             />
-            <div class="flex items-center space-x-4 mt-4">
+            <div class="flex items-center space-x-4 mt-2">
             <MultiSelect.multi_select
               id="multi"
               options={@bot_options}
@@ -332,11 +332,11 @@ defmodule AhptaWeb.ConversationLive.Show do
               on_change={fn opts -> send(self(), {:updated_options, opts}) end}
               placeholder="bots to send this message to..."
               search_placeholder="search bots..."
-              class="autoresize mt-4 w-full rounded dark:bg-black dark:text-gray-100"
+              class="autoresize w-full rounded dark:bg-black dark:text-gray-100"
             />
             <button
               type="submit"
-              class="font-mono mt-4 rounded-md border-4 border-double border-blue-400 bg-none p-1  text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
+              class="font-mono rounded-md border-4 border-double border-blue-400 bg-none p-1  text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
             >
               Send
             </button>
