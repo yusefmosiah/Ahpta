@@ -75,7 +75,7 @@ defmodule AhptaWeb.ConversationLive.Index do
 
   @impl true
   def handle_event("new_conversation", _, socket) do
-    case Conversations.create_conversation(%{topic: "topic..."}) do
+    case Conversations.create_conversation(%{topic:  MnemonicSlugs.generate_slug(3)}) do
       {:ok, saved_conversation} ->
         {:noreply, push_redirect(socket, to: ~p"/conversations/#{saved_conversation.id}")}
 
