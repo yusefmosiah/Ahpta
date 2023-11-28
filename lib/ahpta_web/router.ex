@@ -25,10 +25,11 @@ defmodule AhptaWeb.Router do
     live("/conversations/:id", ConversationLive.Show, :show)
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", AhptaWeb do
-  #   pipe_through :api
-  # end
+  # API
+  scope "/api", AhptaWeb do
+    pipe_through :api
+    resources "/chatgpt", ChatGPTController
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ahpta, :dev_routes) do
