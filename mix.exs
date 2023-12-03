@@ -52,10 +52,10 @@ defmodule Ahpta.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:ex_openai, "~> 1.1.0"},
+      {:qdrant, "~> 0.0.8"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.3.5", only: :dev, runtime: false},
       {:phoenix_multi_select, "~> 0.1"},
-      {:qdrant, "~> 0.0.8"},
       {:mnemonic_slugs, "~> 0.0.3"}
     ]
   end

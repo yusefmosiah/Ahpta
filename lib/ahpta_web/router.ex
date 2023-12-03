@@ -28,7 +28,7 @@ defmodule AhptaWeb.Router do
   # API
   scope "/api", AhptaWeb do
     pipe_through :api
-    resources "/chatgpt", ChatGPTController
+    post "/chatgpt", ChatGPTController, :create
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
