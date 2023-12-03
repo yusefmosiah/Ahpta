@@ -93,7 +93,11 @@ defmodule AhptaWeb.BotLive.Index do
 
   @impl true
   def handle_event("new_bot", _, socket) do
-    bot_params = %{name: MnemonicSlugs.generate_slug(3), system_message: "", is_available_for_rent: true}
+    bot_params = %{
+      name: MnemonicSlugs.generate_slug(3),
+      system_message: "",
+      is_available_for_rent: true
+    }
 
     case Bots.create_bot(bot_params) do
       {:ok, new_bot} ->
@@ -110,7 +114,13 @@ defmodule AhptaWeb.BotLive.Index do
     name = params["name"]
     system_message = params["system_message"]
     bot = Bots.get_bot!(params["id"])
-    {:ok, updated_bot} = Bots.update_bot(bot, %{name: name, system_message: system_message, is_available_for_rent: true})
+
+    {:ok, updated_bot} =
+      Bots.update_bot(bot, %{
+        name: name,
+        system_message: system_message,
+        is_available_for_rent: true
+      })
 
     IO.inspect(updated_bot.system_message, label: "updated_bot")
     {:noreply, socket}

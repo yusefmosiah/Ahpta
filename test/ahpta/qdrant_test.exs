@@ -3,8 +3,7 @@ defmodule Ahpta.QdrantTest do
   alias Ahpta.Qdrant
   alias ExOpenAI.Embeddings
 
-
-  #commented out bc these tests require api keys
+  # commented out bc these tests require api keys
   # describe "create_embedding_and_save/1" do
   #   test "returns :ok when embedding is created and saved successfully" do
   #     content = "test content"

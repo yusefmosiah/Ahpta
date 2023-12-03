@@ -275,23 +275,23 @@ defmodule AhptaWeb.ConversationLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container pb-10 mx-auto w-full max-w-1/2">
+    <div class="max-w-1/2 container mx-auto w-full pb-10">
       <div class="mx-auto dark:bg-black">
         <.header>
-            <div class="flex-grow" id="content_editable" phx-hook="content_editable"></div>
+          <div class="flex-grow" id="content_editable" phx-hook="content_editable"></div>
 
-            <form phx-change="update_topic">
-              <input
-                type="text"
-                id={"topic-" <> @conversation.id}
-                name="topic"
-                value={@conversation.topic}
-                spellcheck="false"
-                autocomplete="off"
-                class="w-full max-w-full font-mono text-4xl font-bold leading-tight rounded-lg border-zinc-200 dark:border-zinc-700 dark:bg-black dark:text-white"
-              />
-              <input type="hidden" name="id" value={@conversation.id} />
-            </form>
+          <form phx-change="update_topic">
+            <input
+              type="text"
+              id={"topic-" <> @conversation.id}
+              name="topic"
+              value={@conversation.topic}
+              spellcheck="false"
+              autocomplete="off"
+              class="font-mono w-full max-w-full rounded-lg border-zinc-200 text-4xl font-bold leading-tight dark:border-zinc-700 dark:bg-black dark:text-white"
+            />
+            <input type="hidden" name="id" value={@conversation.id} />
+          </form>
 
           <.link
             patch={~p"/conversations/#{@conversation}/show/edit"}
@@ -305,7 +305,14 @@ defmodule AhptaWeb.ConversationLive.Show do
 
         <%!-- new message form component --%>
         <div class="space-y-4 dark:text-white">
-          <.form :let={f} for={%{}} as={:input} phx-submit="new_message" data-conversation-id={@conversation.id} class="">
+          <.form
+            :let={f}
+            for={%{}}
+            as={:input}
+            phx-submit="new_message"
+            data-conversation-id={@conversation.id}
+            class=""
+          >
             <.input
               type="textarea"
               id="content"
@@ -315,7 +322,7 @@ defmodule AhptaWeb.ConversationLive.Show do
               autofocus="true"
               required
               phx-hook="AutoResize"
-              class="p-2 w-full rounded border-gray-300 border-double resize-y dark:border-gray-600 dark:bg-black dark:bg-gray-700 dark:text-gray-100"
+              class="w-full resize-y rounded border-double border-gray-300 p-2 dark:border-gray-600 dark:bg-black dark:bg-gray-700 dark:text-gray-100"
             />
             <.input
               type="hidden"
@@ -324,37 +331,37 @@ defmodule AhptaWeb.ConversationLive.Show do
               value="human"
               required
             />
-            <div class="flex items-center mt-2 space-x-4">
-            <MultiSelect.multi_select
-              id="multi"
-              options={@bot_options}
-              form={f}
-              on_change={fn opts -> send(self(), {:updated_options, opts}) end}
-              placeholder="bots to send this message to..."
-              search_placeholder="search bots..."
-              class="w-full rounded autoresize dark:bg-black dark:text-gray-100"
-            />
-            <button
-              type="submit"
-              class="p-1 font-mono text-blue-400 bg-none rounded-md border-4 border-blue-400 border-double hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
-            >
-              Send
-            </button>
+            <div class="mt-2 flex items-center space-x-4">
+              <MultiSelect.multi_select
+                id="multi"
+                options={@bot_options}
+                form={f}
+                on_change={fn opts -> send(self(), {:updated_options, opts}) end}
+                placeholder="bots to send this message to..."
+                search_placeholder="search bots..."
+                class="autoresize w-full rounded dark:bg-black dark:text-gray-100"
+              />
+              <button
+                type="submit"
+                class="font-mono rounded-md border-4 border-double border-blue-400 bg-none p-1 text-blue-400 hover:border-blue-200 hover:bg-blue-400 hover:text-white dark:hover:border-blue-200"
+              >
+                Send
+              </button>
             </div>
           </.form>
         </div>
         <%!-- /new message form component --%>
 
-        <div class="flex justify-between items-center mt-6 mb-10">
+        <div class="mt-6 mb-10 flex items-center justify-between">
           <.link
             navigate={~p"/conversations"}
-            class="inline-block p-4 font-mono text-gray-500 rounded-lg border-4 border-gray-500 border-double hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400"
+            class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400"
           >
             Convos
           </.link>
           <.link
             navigate={~p"/bots"}
-            class="inline-block p-4 font-mono text-gray-500 rounded-lg border-4 border-gray-500 border-double hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400"
+            class="font-mono inline-block rounded-lg border-4 border-double border-gray-500 p-4 text-gray-500 hover:border-white hover:bg-gray-500 hover:text-white dark:border-gray-400"
           >
             Bots
           </.link>
